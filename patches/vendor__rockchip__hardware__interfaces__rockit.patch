@@ -1,0 +1,429 @@
+diff --git a/direct/Android.go b/direct/Android.go
+index b137862..2bc0501 100644
+--- a/direct/Android.go
++++ b/direct/Android.go
+@@ -1,147 +1,139 @@
+ package rockit
+ 
+ import (
+-        "android/soong/android"
+-        "android/soong/cc"
+-        "fmt"
+-        "strconv"
+-        "unsafe"
+-        "os"
+-        "path"
+-        "runtime"
++	"android/soong/android"
++	"android/soong/cc"
++	"fmt"
++	"os"
++	"path"
++	"runtime"
+ )
+ 
+ func init() {
+-    fmt.Println("rockit want to conditional Compile")
+-    android.RegisterModuleType("cc_rockit", DefaultsFactory)
++	fmt.Println("rockit want to conditional Compile")
++	android.RegisterModuleType("cc_rockit", DefaultsFactory)
+ }
+ 
+-func DefaultsFactory() (android.Module) {
+-    module := cc.DefaultsFactory()
+-    android.AddLoadHook(module, Defaults)
+-    return module
++func DefaultsFactory() android.Module {
++	module := cc.DefaultsFactory()
++	android.AddLoadHook(module, Defaults)
++	return module
+ }
+ 
+ func Defaults(ctx android.LoadHookContext) {
+-    platformVersion := ctx.AConfig().PlatformVersionName()
+-    platformVersionInt, err := strconv.Atoi(*(*string)(unsafe.Pointer(&platformVersion)))
+-    if err != nil {
+-        fmt.Printf("rockit cannot get platformVersion, %q could not be parsed as an integer\n", platformVersion)
+-        panic(1)
+-    }
+-
+-    fmt.Printf("platformVersion android %q\n", platformVersion)
+-
+-    type props struct {
+-        Srcs []string
+-        Cflags []string
+-        Shared_libs []string
+-        Include_dirs []string
+-        Header_libs []string
+-        Export_header_lib_headers []string
+-        Static_libs []string
+-    }
+-
+-    p := &props{}
+-    p.Srcs = getSrcs(ctx, platformVersionInt)
+-    p.Cflags = getCflags(ctx, platformVersionInt)
+-    p.Shared_libs = getSharedLibs(ctx, platformVersionInt)
+-    p.Include_dirs = getIncludeDirs(ctx, platformVersionInt)
+-    p.Header_libs = getHeaders(ctx, platformVersionInt)
+-    p.Export_header_lib_headers = getExportHeaders(ctx, platformVersionInt)
+-    p.Static_libs = getStatic_libs(ctx, platformVersionInt)
+-
+-    ctx.AppendProperties(p)
++	platformVersionInt := ctx.AConfig().PlatformSdkVersion().FinalOrFutureInt()
++	fmt.Printf("platformVersion android %d\n", platformVersionInt)
++
++	type props struct {
++		Srcs                      []string
++		Cflags                    []string
++		Shared_libs               []string
++		Include_dirs              []string
++		Header_libs               []string
++		Export_header_lib_headers []string
++		Static_libs               []string
++	}
++
++	p := &props{}
++	p.Srcs = getSrcs(ctx, platformVersionInt)
++	p.Cflags = getCflags(ctx, platformVersionInt)
++	p.Shared_libs = getSharedLibs(ctx, platformVersionInt)
++	p.Include_dirs = getIncludeDirs(ctx, platformVersionInt)
++	p.Header_libs = getHeaders(ctx, platformVersionInt)
++	p.Export_header_lib_headers = getExportHeaders(ctx, platformVersionInt)
++	p.Static_libs = getStatic_libs(ctx, platformVersionInt)
++
++	ctx.AppendProperties(p)
+ }
+ 
+-func getSrcs(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var src []string
++func getSrcs(ctx android.BaseContext, platformVersionInt int) []string {
++	var src []string
+ 
+-    if (platformVersionInt >= 11) {
+-        src = append(src, "RTGralloc4.cpp")
+-    }
++	if platformVersionInt >= 11 {
++		src = append(src, "RTGralloc4.cpp")
++	}
+ 
+-    return src
++	return src
+ }
+ 
+-func getCflags(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var cppflags []string
++func getCflags(ctx android.BaseContext, platformVersionInt int) []string {
++	var cppflags []string
+ 
+-    cppflags = append(cppflags, fmt.Sprintf("-DPLATFORM_VERSION=%d", platformVersionInt))
++	cppflags = append(cppflags, fmt.Sprintf("-DPLATFORM_VERSION=%d", platformVersionInt))
+ 
+-    return cppflags
++	return cppflags
+ }
+ 
+-func getSharedLibs(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var libs []string
++func getSharedLibs(ctx android.BaseContext, platformVersionInt int) []string {
++	var libs []string
+ 
+-    if (platformVersionInt >= 11) {
+-        libs = append(libs, "android.hardware.graphics.mapper@4.0")
+-        libs = append(libs, "libhidlbase")
+-        libs = append(libs, "libgralloctypes")
+-    }
++	if platformVersionInt >= 11 {
++		libs = append(libs, "android.hardware.graphics.mapper@4.0")
++		libs = append(libs, "libhidlbase")
++		libs = append(libs, "libgralloctypes")
++	}
+ 
+-    return libs
++	return libs
+ }
+ 
+-func getIncludeDirs(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var dirs []string
++func getIncludeDirs(ctx android.BaseContext, platformVersionInt int) []string {
++	var dirs []string
+ 
+-    return dirs
++	return dirs
+ }
+ 
+-func getHeaders(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var headers []string
+-
+-    currentDir := getCurrentAbsolutePath()
+-    sourceFile := currentDir
+-    if (platformVersionInt > 10 ) {
+-        sourceFile += "/include/RockitMetadataRetrieverComm.h"
+-    } else {
+-        sourceFile += "/include/RockitMetadataRetriever10.h"
+-    }
+-    destinationFile := currentDir + "/include/RockitMetadataRetriever.h"
+-
+-    _, err := os.Lstat(destinationFile)
+-    if !os.IsNotExist(err) {
+-        os.Remove(destinationFile)
+-    }
+-
+-    err = os.Symlink(sourceFile, destinationFile)
+-    if err != nil {
+-        fmt.Println("Link Error: ", err)
+-    }
+-
+-    if (platformVersionInt >= 12 ) {
+-        headers = append(headers, "libhardware_rockchip_headers")
+-    }
+-
+-    if (platformVersionInt >= 11 ) {
+-        headers = append(headers, "libmediametrics_headers")
+-    }
+-
+-    return headers
++func getHeaders(ctx android.BaseContext, platformVersionInt int) []string {
++	var headers []string
++
++	currentDir := getCurrentAbsolutePath()
++	sourceFile := currentDir
++	if platformVersionInt > 10 {
++		sourceFile += "/include/RockitMetadataRetrieverComm.h"
++	} else {
++		sourceFile += "/include/RockitMetadataRetriever10.h"
++	}
++	destinationFile := currentDir + "/include/RockitMetadataRetriever.h"
++
++	_, err := os.Lstat(destinationFile)
++	if !os.IsNotExist(err) {
++		os.Remove(destinationFile)
++	}
++
++	err = os.Symlink(sourceFile, destinationFile)
++	if err != nil {
++		fmt.Println("Link Error: ", err)
++	}
++
++	if platformVersionInt >= 12 {
++		headers = append(headers, "libhardware_rockchip_headers")
++	}
++
++	if platformVersionInt >= 11 {
++		headers = append(headers, "libmediametrics_headers")
++	}
++
++	return headers
+ }
+ 
+-func getExportHeaders(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var headers []string
++func getExportHeaders(ctx android.BaseContext, platformVersionInt int) []string {
++	var headers []string
+ 
+-    return headers
++	return headers
+ }
+ 
+-func getStatic_libs(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var libs []string
++func getStatic_libs(ctx android.BaseContext, platformVersionInt int) []string {
++	var libs []string
+ 
+-    return libs
++	return libs
+ }
+ 
+ func getCurrentAbsolutePath() string {
+-    var abPath string
++	var abPath string
+ 
+-    _, filename, _, ok := runtime.Caller(0)
+-    if ok {
+-        abPath = path.Dir(filename)
+-    }
++	_, filename, _, ok := runtime.Caller(0)
++	if ok {
++		abPath = path.Dir(filename)
++	}
+ 
+-    return abPath
++	return abPath
+ }
+diff --git a/hw/hidl/services/Android.bp b/hw/hidl/services/Android.bp
+index 09e707c..124bf2e 100644
+--- a/hw/hidl/services/Android.bp
++++ b/hw/hidl/services/Android.bp
+@@ -42,13 +42,13 @@ cc_binary {
+         "libutils",
+     ],
+     required: ["rockit.vendor.base.policy"],
+-    compile_multilib: "prefer32",
++    compile_multilib: "64",
+ }
+ 
+ prebuilt_etc {
+     name: "rockit.vendor.base.policy",
+     sub_dir: "seccomp_policy",
+-    compile_multilib: "prefer32",
++    compile_multilib: "64",
+     vendor: true,
+     arch: {
+         arm: {
+diff --git a/hw/hidl/services/rockit_hw_service.go b/hw/hidl/services/rockit_hw_service.go
+index a26d3cd..0555d15 100644
+--- a/hw/hidl/services/rockit_hw_service.go
++++ b/hw/hidl/services/rockit_hw_service.go
+@@ -1,53 +1,45 @@
+-package rockit_hw_service
+-
+-import (
+-        "android/soong/android"
+-        "android/soong/cc"
+-        "fmt"
+-        "strconv"
+-        "unsafe"
+-)
+-
+-func init() {
+-    fmt.Println("cc_rockit_hw_service want to conditional Compile")
+-    android.RegisterModuleType("cc_rockit_hw_service", DefaultsFactory)
+-}
+-
+-func DefaultsFactory() (android.Module) {
+-    module := cc.DefaultsFactory()
+-    android.AddLoadHook(module, Defaults)
+-    return module
+-}
+-
+-func Defaults(ctx android.LoadHookContext) {
+-    // platform version is 11/12/13...
+-    platformVersion := ctx.AConfig().PlatformVersionName()
+-    platformVersionInt, err := strconv.Atoi(*(*string)(unsafe.Pointer(&platformVersion)))
+-    if err != nil {
+-        fmt.Printf("rockit cannot get platformVersion, %q could not be parsed as an integer\n", platformVersion)
+-        panic(1)
+-    }
+-
+-    fmt.Printf("platformVersion android %q\n", platformVersion)
+-
+-    type props struct {
+-        Shared_libs []string
+-    }
+-
+-    p := &props{}
+-    p.Shared_libs = getSharedLibs(ctx, platformVersionInt)
+-
+-    ctx.AppendProperties(p)
+-}
+-
+-func getSharedLibs(ctx android.BaseContext, platformVersionInt int) ([]string) {
+-    var libs []string
+-
+-    if (platformVersionInt >= 11 ) {
+-        libs = append(libs, "libavservices_minijail")
+-    } else {
+-        libs = append(libs, "libavservices_minijail_vendor")
+-    }
+-
+-    return libs
+-}
++package rockit_hw_service
++
++import (
++	"android/soong/android"
++	"android/soong/cc"
++	"fmt"
++)
++
++func init() {
++	fmt.Println("cc_rockit_hw_service want to conditional Compile")
++	android.RegisterModuleType("cc_rockit_hw_service", DefaultsFactory)
++}
++
++func DefaultsFactory() android.Module {
++	module := cc.DefaultsFactory()
++	android.AddLoadHook(module, Defaults)
++	return module
++}
++
++func Defaults(ctx android.LoadHookContext) {
++	// platform version is 11/12/13...
++	platformVersionInt := ctx.AConfig().PlatformSdkVersion().FinalOrFutureInt()
++	fmt.Printf("platformVersion android %d\n", platformVersionInt)
++
++	type props struct {
++		Shared_libs []string
++	}
++
++	p := &props{}
++	p.Shared_libs = getSharedLibs(ctx, platformVersionInt)
++
++	ctx.AppendProperties(p)
++}
++
++func getSharedLibs(ctx android.BaseContext, platformVersionInt int) []string {
++	var libs []string
++
++	if platformVersionInt >= 11 {
++		libs = append(libs, "libavservices_minijail")
++	} else {
++		libs = append(libs, "libavservices_minijail_vendor")
++	}
++
++	return libs
++}
+diff --git a/hw/hidl/services/seccomp_policy/rockit.vendor.base-arm64.policy b/hw/hidl/services/seccomp_policy/rockit.vendor.base-arm64.policy
+index 2db46ea..354e64c 100644
+--- a/hw/hidl/services/seccomp_policy/rockit.vendor.base-arm64.policy
++++ b/hw/hidl/services/seccomp_policy/rockit.vendor.base-arm64.policy
+@@ -1,3 +1,4 @@
++# ARM64 policy: must match the 64-bit Rockit service.
+ # Organized by frequency of systemcall - in descending order for
+ # best performance.
+ futex: 1
+@@ -12,11 +13,9 @@ writev: 1
+ dup: 1
+ ppoll: 1
+ mmap: 1
+-mmap2: 1
+ getrandom: 1
+ memfd_create: 1
+ ftruncate: 1
+-ftruncate64: 1
+ 
+ # mremap: Ensure |flags| are (MREMAP_MAYMOVE | MREMAP_FIXED) TODO: Once minijail
+ # parser support for '<' is in this needs to be modified to also prevent
+@@ -33,10 +32,8 @@ sigaltstack: 1
+ clone: 1
+ setpriority: 1
+ getuid: 1
+-getuid32: 1
+ fstat: 1
+-fstat64: 1
+-fstatfs64: 1
++fstatfs: 1
+ pread64: 1
+ faccessat: 1
+ readlinkat: 1
+@@ -51,17 +48,14 @@ gettimeofday: 1
+ sched_yield: 1
+ nanosleep: 1
+ lseek: 1
+-_llseek: 1
+ sched_get_priority_max: 1
+ sched_get_priority_min: 1
+-statfs64: 1
++statfs: 1
+ sched_setscheduler: 1
+-fstatat64: 1
+-ugetrlimit: 1
++newfstatat: 1
+ getrlimit: 1
+ getdents64: 1
+-getrandom: 1
+ 
+-@include /system/etc/seccomp_policy/crash_dump.arm.policy
++@include /system/etc/seccomp_policy/crash_dump.arm64.policy
+ 
+-@include /system/etc/seccomp_policy/code_coverage.arm.policy
++@include /system/etc/seccomp_policy/code_coverage.arm64.policy

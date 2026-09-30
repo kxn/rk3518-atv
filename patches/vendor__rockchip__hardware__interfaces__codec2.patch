@@ -1,0 +1,13 @@
+diff --git a/services/Android.bp b/services/Android.bp
+index 96670ee..5ffce9e 100644
+--- a/services/Android.bp
++++ b/services/Android.bp
+@@ -2,7 +2,7 @@ cc_binary {
+     name: "android.hardware.media.c2@1.1-service",
+     vendor: true,
+     relative_install_path: "hw",
+-    compile_multilib: "prefer32",
++    compile_multilib: "64",
+ 
+     init_rc: ["android.hardware.media.c2@1.1-service.rc"],
+ 

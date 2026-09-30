@@ -1,0 +1,10 @@
+name: Source package checks
+on: [push, pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_repository.py
+      - run: python3 -m py_compile scripts/*.py loader/*.py
+      - run: bash -n scripts/*.sh

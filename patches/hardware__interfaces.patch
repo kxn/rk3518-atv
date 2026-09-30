@@ -1,0 +1,72 @@
+diff --git a/bluetooth/1.0/default/vendor_interface.cc b/bluetooth/1.0/default/vendor_interface.cc
+index 1d15dd6..3c16ea3 100644
+--- a/bluetooth/1.0/default/vendor_interface.cc
++++ b/bluetooth/1.0/default/vendor_interface.cc
+@@ -22,6 +22,9 @@
+ 
+ #include <dlfcn.h>
+ #include <fcntl.h>
++#include <sys/random.h>
++#include <errno.h>
++#include <string.h>
+ 
+ #include "bluetooth_address.h"
+ #include "h4_protocol.h"
+@@ -195,9 +198,11 @@ bool VendorInterface::Open(InitializeCompleteCallback initialize_complete_cb,
+ 
+   // Initialize vendor interface
+ 
+-  lib_handle_ = dlopen(VENDOR_LIBRARY_NAME, RTLD_NOW);
++  char vendor_library[PROPERTY_VALUE_MAX];
++  property_get("ro.vendor.bluetooth.library_name", vendor_library, VENDOR_LIBRARY_NAME);
++  lib_handle_ = dlopen(vendor_library, RTLD_NOW);
+   if (!lib_handle_) {
+-    ALOGE("%s unable to open %s (%s)", __func__, VENDOR_LIBRARY_NAME,
++    ALOGE("%s unable to open %s (%s)", __func__, vendor_library,
+           dlerror());
+     return false;
+   }
+@@ -206,7 +211,7 @@ bool VendorInterface::Open(InitializeCompleteCallback initialize_complete_cb,
+       dlsym(lib_handle_, VENDOR_LIBRARY_SYMBOL_NAME));
+   if (!lib_interface_) {
+     ALOGE("%s unable to find symbol %s in %s (%s)", __func__,
+-          VENDOR_LIBRARY_SYMBOL_NAME, VENDOR_LIBRARY_NAME, dlerror());
++          VENDOR_LIBRARY_SYMBOL_NAME, vendor_library, dlerror());
+     return false;
+   }
+ 
+@@ -214,7 +219,33 @@ bool VendorInterface::Open(InitializeCompleteCallback initialize_complete_cb,
+ 
+   uint8_t local_bda[BluetoothAddress::kBytes];
+   if (!BluetoothAddress::get_local_address(local_bda)) {
+-    LOG_ALWAYS_FATAL("%s: No Bluetooth Address!", __func__);
++    // AIC reads the controller OTP during firmware initialization, after this
++    // bootstrap address is needed. Keep a stable fallback for blank OTP parts.
++    if (strcmp(vendor_library, "libbt-vendor-aic.so") != 0) {
++      LOG_ALWAYS_FATAL("%s: No Bluetooth Address!", __func__);
++    }
++    // A blank controller OTP must also survive clearing userdata. Derive the
++    // bootstrap address from the bootloader's per-board serial, then persist it.
++    char serial_property[PROPERTY_VALUE_MAX] = {0};
++    property_get("ro.boot.serialno", serial_property, "");
++    const std::string serial_text(serial_property);
++    char* serial_end = nullptr;
++    errno = 0;
++    const uint64_t serial = strtoull(serial_text.c_str(), &serial_end, 16);
++    if (errno || serial_text.empty() || !serial_end || *serial_end || !serial) {
++      ALOGE("%s: No stable board serial for AIC fallback address", __func__);
++      return false;
++    }
++    local_bda[0] = 0x02;
++    for (size_t i = 1; i < sizeof(local_bda); ++i) {
++      local_bda[i] = (serial >> ((sizeof(local_bda) - 1 - i) * 8)) & 0xff;
++    }
++    char address[BluetoothAddress::kStringLength + 1];
++    BluetoothAddress::bytes_to_string(local_bda, address);
++    if (property_set(PERSIST_BDADDR_PROPERTY, address) != 0) {
++      ALOGE("%s: Cannot persist AIC fallback address", __func__);
++      return false;
++    }
+   }
+   int status = lib_interface_->init(&lib_callbacks, (unsigned char*)local_bda);
+   if (status) {

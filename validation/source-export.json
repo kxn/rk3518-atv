@@ -1,0 +1,775 @@
+{
+  "patches": [
+    {
+      "path": "frameworks/av",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "frameworks/opt/net/wifi",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "hardware/interfaces",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "packages/apps/Provision",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "packages/apps/TvSettings",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "system/core",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "device/rockchip/common",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "device/rockchip/rk3528",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "vendor/rockchip/common",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "vendor/rockchip/hardware/interfaces/gatekeeper",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "vendor/rockchip/hardware/interfaces/weaver",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "vendor/rockchip/hardware/interfaces/codec2",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "vendor/rockchip/hardware/interfaces/rockit",
+      "clean_apply": true,
+      "error": ""
+    },
+    {
+      "path": "hardware/rockchip/audio",
+      "clean_apply": true,
+      "error": ""
+    }
+  ],
+  "inputs": [
+    {
+      "path": "hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm/libhdr_params_parser.so",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm64/libhdr_params_parser.so",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/app/res/raw/silent.wav",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/app/tests/unit/res/raw/image_200_200.jpg",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/app/tests/unit/res/raw/image_200_200_blue.jpeg",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/app/tests/unit/res/raw/image_200_200_orange.jpeg",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/app/tests/unit/res/raw/image_600_600.jpg",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-hdpi/ic_bluetooth_connected_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-hdpi/ic_bluetooth_dots_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-mdpi/ic_bluetooth_connected_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-mdpi/ic_bluetooth_dots_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-xhdpi/ic_bluetooth_connected_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-xhdpi/ic_bluetooth_dots_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-xxhdpi/ic_bluetooth_connected_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/drawable-xxhdpi/ic_bluetooth_dots_black.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-hdpi/ic_launcher_round.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-mdpi/ic_launcher_round.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/leaudio/gradle/wrapper/gradle-wrapper.jar",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/android/pandora/server/res/raw/test_cbr.mp3",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/apex/com.android.btservices.avbpubkey",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/framework/tests/bumble/doc/asset/java-bumble-test-setup-without-tf.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/docs/architecture/data_flow_diagram.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/docs/testing/cert_test_architecture_drawing.png",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/dumpsys/bundler/test.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/dumpsys/internal/test_data/float.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/dumpsys/internal/test_data/integer.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/dumpsys/internal/test_data/string.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/dumpsys/internal/test_data/struct.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/shim/test_data/dumpsys_data.bfbs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/gd/shim/test_data/dumpsys_test_data_bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/avrcp_browse_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/avrcp_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/avrcp_test_packets_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/change_path_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/get_capabilities_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/get_item_attributes_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/get_play_status_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/get_total_number_of_items_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/pass_through_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/play_item_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/register_notification_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/set_absolute_volume_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/set_addressed_player_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/set_browsed_player_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/packet/tests/fuzzers/corpus/vendor_packet_corpus/validpacket",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/change_path_error_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/change_path_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/change_path_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/change_path_up_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/changed_play_pos_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/changed_volume_changed_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/general_reject_invalid_command_packet",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_capabilities_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_capabilities_request_company_id",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_capabilities_request_unknown",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_capabilities_response_company_id",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_capabilities_response_events_supported",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_element_attributes_request_full",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_element_attributes_request_partial",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_elements_attributes_response_full",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_error_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_folder_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_media_player_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_request_no_attrs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_request_now_playing",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_request_title",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_request_vfs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_folder_items_song_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_item_attributes_request_all_attributes",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_item_attributes_request_all_attributes_invalid",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_item_attributes_song_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_play_status_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_play_status_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_total_number_of_items_request_media_players",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_total_number_of_items_request_now_playing",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_total_number_of_items_request_vfs",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/get_total_number_of_items_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_addressed_player_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_available_players_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_now_playing_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_play_status_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_track_changed_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_uids_notificaiton",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/interim_volume_changed_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/pass_through_command_play_pushed",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/pass_through_command_play_released",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/play_item_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/play_item_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/register_notification_invalid",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/register_play_status_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/register_volume_changed_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/reject_player_app_settings_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/rejected_volume_changed_notification",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_absolute_volume_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_absolute_volume_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_addressed_player_id_1_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_addressed_player_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_addressed_player_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_browsed_player_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/set_browsed_player_response",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_browse_packet",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_change_path_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_get_capabilities_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_get_element_attributes_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_get_folder_items_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_get_item_attributes_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_get_total_number_of_items_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_play_item_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_set_addressed_player_request",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/profile/avrcp/tests/avrcp_device_fuzz/corpus/short_vendor_packet",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/stack/test/a2dp/raw_data/pcm0844s.wav",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "packages/modules/Bluetooth/system/stack/test/a2dp/raw_data/pcm1644s.wav",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/doc/chromium/devkeys/kernel.keyblock",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/doc/chromium/devkeys/kernel_data_key.vbprivk",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/drivers/video/fonts/ankacoder_c75_r.ttf",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/drivers/video/fonts/cantoraone_regular.ttf",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/drivers/video/fonts/nimbus_sans_l_regular.ttf",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/drivers/video/fonts/rufscript010.ttf",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/scripts/mkkrnlimg",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/binman/test/descriptor.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/binman/test/u_boot_no_ucode_ptr",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/binman/test/u_boot_ucode_ptr",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/easylogo/linux_blackfin.tga",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/easylogo/linux_logo.tga",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_0.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_1.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_2.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_3.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_4.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_5.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/images/battery_fail.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/atmel.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/compulab.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/denx-comp.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/denx.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/engicam.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/esd.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/freescale.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/gateworks.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/intercontrol.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/linux_logo_ttcontrol.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/linux_logo_ttcontrol_palfin.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/ronetix.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/siemens.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/solidrun.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/syteco.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/toradex.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "rk3518-atv-u-boot/tools/logos/wandboard.bmp",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfw_8800d80_h_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfw_8800d80_h_u02_ipc.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfw_8800d80_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfw_8800d80_u02_ipc.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfwbt_8800d80_h_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fmacfwbt_8800d80_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fw_patch_8800d80_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fw_patch_8800d80_u02_ext0.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fw_patch_8800d80_u04.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fw_patch_table_8800d80_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/fw_patch_table_8800d80_u04.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/wifi/firmware/lmacfw_rf_8800d80_u02.bin",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/gpu/Mali450/lib/arm/libGLES_mali.so",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/gpu/Mali450/lib/arm64/libGLES_mali.so",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/gpu/Mali450/lib/arm/libGLES_mali.so",
+      "upstream_hash_verified": true
+    },
+    {
+      "path": "vendor/rockchip/common/gpu/Mali450/lib/arm64/libGLES_mali.so",
+      "upstream_hash_verified": true
+    }
+  ],
+  "clean_full_build": false,
+  "device_cold_boot_v7": false,
+  "host_regressions": {
+    "mac_selection": "ASAN/UBSAN PASS",
+    "bluetooth_dump_snapshot": "ASAN/UBSAN PASS"
+  },
+  "loader_build": "Both pinned variants built; independent CRC, bounds, all six payloads and DDR parameter validation PASS"
+}

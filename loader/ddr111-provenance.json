@@ -1,0 +1,11 @@
+{
+  "commit": "feab2172b40f831a1f0c0e2eacc348c19ea2f780",
+  "entry": {
+    "path": "bin/rk35/rk3528_ddr_1056MHz_v1.11.bin",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "2b703a389df1e7ccee38da714fd491cba0516011",
+    "size": 60904,
+    "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/2b703a389df1e7ccee38da714fd491cba0516011"
+  }
+}

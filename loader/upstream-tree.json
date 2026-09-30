@@ -1,0 +1,45 @@
+{
+  "commit": "3e288fe814e059dd06833495f845cab04ac20a5c",
+  "tree": [
+    {
+      "path": "bin/rk35/rk3528_ddr_1056MHz_v1.14.bin",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d73666a4637eaddb71a0edad3b470c683676d855",
+      "size": 60816,
+      "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/d73666a4637eaddb71a0edad3b470c683676d855"
+    },
+    {
+      "path": "bin/rk35/rk3528_spl_v1.07.bin",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a386890217ecfa182c0e5fe6542f48af57c0f8ab",
+      "size": 327565,
+      "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/a386890217ecfa182c0e5fe6542f48af57c0f8ab"
+    },
+    {
+      "path": "bin/rk35/rk3528_usbplug_v1.04.bin",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d10f48a2bd4b6f3510050ecaca74f623943915c9",
+      "size": 91812,
+      "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/d10f48a2bd4b6f3510050ecaca74f623943915c9"
+    },
+    {
+      "path": "tools/boot_merger",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "932682002e9c0fd0773a7647fb35f2fc77059c8c",
+      "size": 2098080,
+      "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/932682002e9c0fd0773a7647fb35f2fc77059c8c"
+    },
+    {
+      "path": "tools/ddrbin_tool.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "745a50063c6761ff6a4e4f153b0079db85465d62",
+      "size": 214935,
+      "url": "https://api.github.com/repos/rockchip-linux/rkbin/git/blobs/745a50063c6761ff6a4e4f153b0079db85465d62"
+    }
+  ]
+}

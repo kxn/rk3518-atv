@@ -1,0 +1,14 @@
+diff --git a/libwifi_hal/Android.bp b/libwifi_hal/Android.bp
+index 9e75776..6dc0238 100644
+--- a/libwifi_hal/Android.bp
++++ b/libwifi_hal/Android.bp
+@@ -182,6 +182,9 @@ wifi_cc_defaults {
+             slsi: {
+                 whole_static_libs: ["libwifi-hal-slsi"],
+             },
++            wlan0: {
++                whole_static_libs: ["libwifi-hal-aic-sdio"],
++            },
+             conditions_default: {
+                 whole_static_libs: ["libwifi-hal-fallback"],
+             },

@@ -1,0 +1,93 @@
+[
+  {
+    "repo": "rk3518-atv-bluetooth",
+    "path": "src/aosp/packages/modules/Bluetooth",
+    "url": "https://github.com/kxn/rk3518-atv-bluetooth.git",
+    "revision": "f10a6029873277be263eddc4d4d329e4f18cb66c",
+    "upstream": "https://android.googlesource.com/platform/packages/modules/Bluetooth",
+    "upstream_revision": "de2248e503812528d440d0717e76b84148a92e56",
+    "import_base": "285e05ff3d40405a915f784ed8334f6d56a50b27",
+    "history": "source snapshot"
+  },
+  {
+    "repo": "rk3518-atv-u-boot",
+    "path": "src/u-boot",
+    "url": "https://github.com/kxn/rk3518-atv-u-boot.git",
+    "revision": "599a1981810f01af5caa26c2453c0b651594d1be",
+    "upstream": "https://gitlab.com/rockchip_radxa_android13/rk/u-boot.git",
+    "upstream_revision": "f182af929fc80d51685b117b3185e6a2e5c17853",
+    "import_base": "66c9feb43d8e49653f0a495b18a2e5777daefc10",
+    "history": "source snapshot"
+  },
+  {
+    "repo": "rk3518-atv-hwcomposer",
+    "path": "src/aosp/hardware/rockchip/hwcomposer",
+    "url": "https://github.com/kxn/rk3518-atv-hwcomposer.git",
+    "revision": "0258c0788410853dd5f24f4e3dd33575ed10b928",
+    "upstream": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk35/hwcomposer2.git",
+    "upstream_revision": "f8586c8a417f67d38513cc04d0ff2c004be37ff8",
+    "import_base": "d2e4d6f8bce20c77e43d672de53516e3e93e425b",
+    "history": "source snapshot"
+  },
+  {
+    "repo": "rk3518-atv-kernel",
+    "path": "src/rk-kernel",
+    "url": "https://github.com/kxn/rk3518-atv-kernel.git",
+    "revision": "b929def96cafd95309f97f30890d3a1955c6d7d7",
+    "upstream": "https://github.com/rockchip-linux/kernel",
+    "upstream_revision": "77168c8d5ab82399f65a80e9f807b50ba37cf483",
+    "history": "upstream ancestry"
+  },
+  {
+    "repo": "rk3518-atv-aic8800",
+    "path": "src/aic8800",
+    "url": "https://github.com/kxn/rk3518-atv-aic8800.git",
+    "revision": "b8219164aa32842b439ffd6ff4b6cc077af3a837",
+    "upstream": "https://github.com/radxa-pkg/aic8800",
+    "upstream_revision": "516e3b087763d80c44f5e3b6d2dd63e0d925c91d",
+    "history": "upstream ancestry"
+  },
+  {
+    "path": "src/aosp/external/tinyalsa",
+    "url": "https://gitlab.com/rockchip_android14_radxa_rkr6/platform/external/tinyalsa.git",
+    "revision": "770993cc4bf3921844fb682f3a73382886f60f14",
+    "history": "pinned upstream"
+  },
+  {
+    "path": "src/aosp/external/speex",
+    "url": "https://gitlab.com/rockchip_android14_radxa_rkr6/platform/external/speex.git",
+    "revision": "237b2b963f3c895b2fb8e6fbd89992e5b65b4a1e",
+    "history": "pinned upstream"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/libbaseparameter",
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk29/libbaseparameter.git",
+    "revision": "b7a8a8ceb378bd99ffc68649e6b777cabab22fdf",
+    "history": "pinned upstream"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/libgraphicpolicy",
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk29/libgraphicpolicy.git",
+    "revision": "deca46dbd76d00c4b1eeca02c2f20c92282dcc36",
+    "history": "pinned upstream"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/libhardware_rockchip",
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk35/libhardware_rockchip.git",
+    "revision": "4fdef9a5d69d8da9cdf074907650c96021881a5b",
+    "history": "pinned upstream"
+  },
+  {
+    "repo": "rk3518-atv-device",
+    "path": "src/device-support",
+    "url": "https://github.com/kxn/rk3518-atv-device.git",
+    "revision": "9a9fa4a5436132349e901d74403a7923ea7cc027",
+    "history": "project-owned source and attributed overlays"
+  },
+  {
+    "path": "src/rkbin",
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/rkbin.git",
+    "revision": "4c4e34a4cec9ff2ed25ea3a781653db3aeb0ce5c",
+    "history": "pinned upstream"
+  }
+]

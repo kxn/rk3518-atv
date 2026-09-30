@@ -1,0 +1,28 @@
+diff --git a/drm/drmserver/Android.bp b/drm/drmserver/Android.bp
+index 81c2003457..ebea1e6386 100644
+--- a/drm/drmserver/Android.bp
++++ b/drm/drmserver/Android.bp
+@@ -88,7 +88,8 @@ drmserver_cc_binary {
+         "-Werror",
+     ],
+ 
+-    compile_multilib: "prefer32",
++    // 64-bit drmserver.
++    // compile_multilib: "prefer32",
+ 
+     soong_config_variables: {
+         TARGET_DYNAMIC_64_32_DRMSERVER: {
+diff --git a/media/mediaserver/Android.bp b/media/mediaserver/Android.bp
+index 2341af1d96..ddfb53d6b3 100644
+--- a/media/mediaserver/Android.bp
++++ b/media/mediaserver/Android.bp
+@@ -78,7 +78,8 @@ mediaserver_cc_binary {
+     // TO ENABLE 64-BIT MEDIASERVER ON MIXED 32/64-BIT DEVICES, COMMENT
+     // OUT THE FOLLOWING LINE:
+     // ****************************************************************
+-    compile_multilib: "prefer32",
++    // 64-bit mediaserver: vendor audio/C2 HALs all have arm64 builds.
++    // compile_multilib: "prefer32",
+ 
+     cflags: [
+         "-Werror",

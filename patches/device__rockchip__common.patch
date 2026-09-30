@@ -1,0 +1,1021 @@
+diff --git a/auto_generator.py b/auto_generator.py
+index 53df132..32206db 100755
+--- a/auto_generator.py
++++ b/auto_generator.py
+@@ -144,8 +144,8 @@ def main(argv):
+                                 libfile = include_apklib_path + '/' + string[1]
+                                 MY_LOCAL_PREBUILT_JNI_LIBS += '\t' + 'lib/arm' + '/' + string[1] + '\\' + '\n'
+                                 if(os.path.isdir(libfile)):
+-				        continue
+-				else:
++                                    continue
++                                else:
+                                     includelib = file(libfile,'w')
+                                     includelib.write(data)
+                     tmp_jni_libs = '\\' + '\n'
+diff --git a/device.mk b/device.mk
+index 2995277..f4a6424 100644
+--- a/device.mk
++++ b/device.mk
+@@ -129,8 +129,6 @@ PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/wpa_config.txt:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_config.txt \
+     hardware/broadcom/wlan/bcmdhd/config/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf \
+     hardware/broadcom/wlan/bcmdhd/config/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf \
+-    hardware/realtek/wlan/supplicant_overlay_config/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_rtk.conf \
+-    hardware/realtek/wlan/supplicant_overlay_config/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_rtk.conf
+ 
+ #for ssv6051
+ PRODUCT_COPY_FILES += \
+@@ -145,8 +143,9 @@ PRODUCT_PACKAGES += \
+     wifilogd \
+     wpa_supplicant \
+     wpa_cli \
++    android.hardware.wifi-service \
+     wpa_supplicant.conf \
+-    libwifi-hal-package \
++    libwifi-hal \
+     dhcpcd.conf
+ 
+ ifeq ($(ROCKCHIP_USE_LAZY_HAL),true)
+@@ -314,11 +313,13 @@ PRODUCT_PACKAGES += \
+     libjni_pinyinime
+ 
+ ifeq ($(filter atv, $(strip $(TARGET_BOARD_PLATFORM_PRODUCT))), )
++ifneq ($(strip $(BOARD_HAS_SENSOR_HAL)),false)
+ # Sensor HAL
+ PRODUCT_PACKAGES += \
+     android.hardware.sensors@1.0-service \
+     android.hardware.sensors@1.0-impl \
+     sensors.$(TARGET_BOARD_HARDWARE)
++endif
+ 
+ endif
+ 
+@@ -433,6 +434,12 @@ PRODUCT_PACKAGES += \
+     android.hardware.graphics.composer@2.1-impl \
+     android.hardware.graphics.composer@2.1-service
+ 
++# RK3528 drmhwc2 lacks the HWC 2.2+ hooks required by the Composer 3 adapter.
++# Keep its HIDL 2.1 service and do not advertise the incompatible AIDL service.
++ifneq ($(strip $(TARGET_BOARD_PLATFORM)),rk3528)
++PRODUCT_PACKAGES += android.hardware.graphics.composer3-service.rockchip
++endif
++
+ # iep
+ ifneq ($(filter rk3188 rk3190 rk3026 rk3288 rk312x rk3126c rk3128 px3se rk3368 rk3326 rk356x rk3328 rk3366 rk3399, $(strip $(TARGET_BOARD_PLATFORM))), )
+ BUILD_IEP := true
+@@ -442,13 +449,6 @@ else
+ BUILD_IEP := false
+ endif
+ 
+-# rkvtunnel
+-ifneq ($(filter rk3528, $(strip $(TARGET_BOARD_PLATFORM))), )
+-PRODUCT_PACKAGES += \
+-    librkvt \
+-    librkvt.vendor \
+-    librkvt_win
+-endif
+ 
+ # Health/Battery & Charger
+ $(call inherit-product, device/rockchip/common/modules/health.mk)
+@@ -795,32 +795,6 @@ PRODUCT_ENFORCE_RRO_TARGETS := \
+     framework-res
+ endif
+ 
+-#The module which belong to vndk-sp is defined by google
+-PRODUCT_PACKAGES += \
+-    android.hardware.renderscript@1.0.vndk-sp\
+-    android.hardware.graphics.allocator@2.0.vndk-sp\
+-    android.hardware.graphics.mapper@2.0.vndk-sp\
+-    android.hardware.graphics.common@1.0.vndk-sp\
+-    libhwbinder.vndk-sp\
+-    libbase.vndk-sp\
+-    libcutils.vndk-sp\
+-    libhardware.vndk-sp\
+-    libhidlbase.vndk-sp\
+-    libhidltransport.vndk-sp\
+-    libutils.vndk-sp\
+-    libc++.vndk-sp\
+-    libRS_internal.vndk-sp\
+-    libRSDriver.vndk-sp\
+-    libRSCpuRef.vndk-sp\
+-    libbcinfo.vndk-sp\
+-    libblas.vndk-sp\
+-    libft2.vndk-sp\
+-    libpng.vndk-sp\
+-    libcompiler_rt.vndk-sp\
+-    libbacktrace.vndk-sp\
+-    libunwind.vndk-sp\
+-    liblzma.vndk-sp\
+-
+ #######for target product ########
+ ifeq ($(TARGET_BOARD_PLATFORM_PRODUCT),box)
+   DEVICE_PACKAGE_OVERLAYS += device/rockchip/common/overlay_screenoff
+@@ -1012,4 +986,8 @@ PRODUCT_PRODUCT_PROPERTIES += \
+     persist.sys.fuse.passthrough.enable=true
+ 
+ PRODUCT_COPY_FILES += \
+-    vendor/rockchip/common/bin/$(TARGET_ARCH)/parted:$(PRODUCT_OUT)/$(TARGET_COPY_OUT_RECOVERY)/root/system/bin/parted
++
++# AllStream appliance: retain media libraries, input methods and platform services.
++ifeq ($(TARGET_PRODUCT),rk3528_box)
++PRODUCT_PACKAGES := $(filter-out RKUpdateService RKDeviceTest StressTest MediaCenter DLNA WifiDisplay,$(PRODUCT_PACKAGES))
++endif
+diff --git a/init.connectivity.rc b/init.connectivity.rc
+index eff4956..250bb2f 100755
+--- a/init.connectivity.rc
++++ b/init.connectivity.rc
+@@ -67,7 +67,9 @@ on property:vendor.wifi.direct.interface=p2p-dev-wlan0
+     setprop wifi.direct.interface p2p-dev-wlan0
+ 
+ service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
+-    /vendor/etc/wifi/wpa_config.txt
++    -O/data/vendor/wifi/wpa/sockets \
++    -puse_p2p_group_interface=1 \
++    -g@android:wpa_wlan0
+ #   we will start as root and wpa_supplicant will switch to user wifi
+ #   after setting up the capabilities required for WEXT
+ #   user wifi
+diff --git a/modules/hdmi_cec.mk b/modules/hdmi_cec.mk
+index 321f36e..3912740 100644
+--- a/modules/hdmi_cec.mk
++++ b/modules/hdmi_cec.mk
+@@ -6,7 +6,7 @@ PRODUCT_COPY_FILES += \
+ 
+ PRODUCT_PROPERTY_OVERRIDES += ro.hdmi.device_type=4
+ PRODUCT_PACKAGES += \
+-	hdmi_cec.$(TARGET_BOARD_PLATFORM)
++	hdmi_cec.rk30board
+ 
+ # HDMI CEC HAL
+ PRODUCT_PACKAGES += \
+diff --git a/modules/optee.mk b/modules/optee.mk
+index c59cda3..0ba9bd3 100644
+--- a/modules/optee.mk
++++ b/modules/optee.mk
+@@ -29,10 +29,9 @@ endif
+ 
+ PRODUCT_PACKAGES += \
+     tee-supplicant \
+-    android.hardware.gatekeeper@1.0-service.optee \
++    android.hardware.gatekeeper-service.optee \
+     android.hardware.security.keymint-service.optee \
+-    android.hardware.weaver@1.0-service \
+-    android.hardware.weaver@1.0-impl
++    android.hardware.weaver-service.optee
+ 
+ ifneq ($(filter rk3326 rk3528 rk356x rk3562 rk3588, $(strip $(TARGET_BOARD_PLATFORM))), )
+ 
+diff --git a/modules/rockchip_apps.mk b/modules/rockchip_apps.mk
+index 1f27492..4ce59b8 100644
+--- a/modules/rockchip_apps.mk
++++ b/modules/rockchip_apps.mk
+@@ -21,3 +21,8 @@ PRODUCT_PACKAGES += \
+     RkExplorer \
+     StressTest \
+     RKUpdateService
++
++# AllStream appliance: retain media libraries, input methods and platform services.
++ifeq ($(TARGET_PRODUCT),rk3528_box)
++PRODUCT_PACKAGES := $(filter-out RKUpdateService RKDeviceTest StressTest MediaCenter DLNA WifiDisplay,$(PRODUCT_PACKAGES))
++endif
+diff --git a/modules/rockchip_apps_box.mk b/modules/rockchip_apps_box.mk
+index 12771f8..f10ddf9 100644
+--- a/modules/rockchip_apps_box.mk
++++ b/modules/rockchip_apps_box.mk
+@@ -45,3 +45,8 @@ PRODUCT_PACKAGES += \
+     MediaCenter
+ 
+ #end Add Rockchip BOX/ATV Apps
++
++# AllStream appliance: retain media libraries, input methods and platform services.
++ifeq ($(TARGET_PRODUCT),rk3528_box)
++PRODUCT_PACKAGES := $(filter-out RKUpdateService RKDeviceTest StressTest MediaCenter DLNA WifiDisplay,$(PRODUCT_PACKAGES))
++endif
+diff --git a/rootdir/init.insmod.cfg b/rootdir/init.insmod.cfg
+index 6b52709..94245f3 100644
+--- a/rootdir/init.insmod.cfg
++++ b/rootdir/init.insmod.cfg
+@@ -1,5 +1,5 @@
+ #insmod /vendor/lib/modules/ump.ko
+-#insmod /vendor/lib/modules/mali.ko
++insmod /vendor/lib/modules/mali.ko
+ insmod /vendor/lib/modules/bifrost_kbase.ko
+ insmod /vendor/lib/modules/midgard_kbase.ko
+ insmod /vendor/lib/modules/mali_kbase.ko
+@@ -9,6 +9,9 @@ insmod /vendor/lib/modules/pvrsrvkm.ko
+ insmod /vendor/lib/modules/rknpu.ko
+ insmod /vendor/lib/modules/rknpu-clang.ko
+ insmod /vendor/lib/modules/r8168.ko
++# AIC8800 SDIO BSP must initialize firmware before the Wi-Fi function driver.
++insmod /vendor/lib/modules/aic8800_bsp.ko
++insmod /vendor/lib/modules/aic8800_fdrv.ko
+ insmod /vendor/lib/modules/aic_load_fw.ko
+ insmod /vendor/lib/modules/aic_btusb.ko
+ #insmod /rk30xxnand_ko.ko
+diff --git a/rootdir/init.rk30board.rc b/rootdir/init.rk30board.rc
+index 560fc32..83017a8 100755
+--- a/rootdir/init.rk30board.rc
++++ b/rootdir/init.rk30board.rc
+@@ -279,13 +279,6 @@ on property:persist.abc_switch=1
+ on property:persist.abc_switch=0
+     stop abc
+ 
+-##$_rbox_$_modify_$_shenzhenyi_20160312
+-##$_rbox_$_modify_$_begin
+-service displayd /system/bin/displayd
+-    class core
+-    socket displayd stream 0760 system system
+-##$_rbox_$_modify_$_end
+-
+ ##$_rbox_$_modify_$_chenzhi_20120309
+ ##$_rbox_$_modify_$_begin
+ service pppoe_setup /system/bin/pppoe-setup
+diff --git a/rootdir/rootdir.mk b/rootdir/rootdir.mk
+index 5099df6..542df01 100644
+--- a/rootdir/rootdir.mk
++++ b/rootdir/rootdir.mk
+@@ -23,7 +23,7 @@ PRODUCT_COPY_FILES += \
+     $(ROCKCHIP_ROOT_DIR_PATH)/init.insmod.cfg:$(TARGET_COPY_OUT_VENDOR)/etc/init.insmod.cfg \
+     $(ROCKCHIP_ROOT_DIR_PATH)/init.insmod.sh:$(TARGET_COPY_OUT_VENDOR)/bin/init.insmod.sh \
+     $(ROCKCHIP_ROOT_DIR_PATH)/init.rk30board.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.$(TARGET_BOARD_HARDWARE).rc \
+-    $(ROCKCHIP_ROOT_DIR_PATH)/init.rk30board.usb.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.$(TARGET_BOARD_HARDWARE).usb.rc \
++    $(if $(BOARD_USB_INIT_RC),$(BOARD_USB_INIT_RC),$(ROCKCHIP_ROOT_DIR_PATH)/init.rk30board.usb.rc):$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.$(TARGET_BOARD_HARDWARE).usb.rc \
+     $(ROCKCHIP_ROOT_DIR_PATH)/init.recovery.rk30board.rc:recovery/root/init.recovery.$(TARGET_BOARD_HARDWARE).rc \
+     $(ROCKCHIP_ROOT_DIR_PATH)/ueventd.rockchip.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc \
+ 
+diff --git a/scripts/parameter_tools/Android.bp b/scripts/parameter_tools/Android.bp
+index d1ba22d..1aa2727 100644
+--- a/scripts/parameter_tools/Android.bp
++++ b/scripts/parameter_tools/Android.bp
+@@ -2,10 +2,10 @@ python_binary_host {
+     name: "parameter_tools",
+     version: {
+         py2: {
+-            enabled: true,
++            enabled: false,
+         },
+         py3: {
+-            enabled: false,
++            enabled: true,
+         },
+     },
+ 
+diff --git a/scripts/parameter_tools/parameter_generator.py b/scripts/parameter_tools/parameter_generator.py
+index 03e4267..cf94056 100644
+--- a/scripts/parameter_tools/parameter_generator.py
++++ b/scripts/parameter_tools/parameter_generator.py
+@@ -20,7 +20,7 @@ def calculate_blocks(size):
+     else:
+         part_size = int(size)
+     # convert to blocks
+-    return part_size / 512
++    return part_size // 512
+ 
+ # return end blocks pos
+ def generate_pt(pt_name,pt_size,pt_start):
+diff --git a/scripts/soong_rockchip_prebuilt/Android.bp b/scripts/soong_rockchip_prebuilt/Android.bp
+deleted file mode 100644
+index 8f4280b..0000000
+--- a/scripts/soong_rockchip_prebuilt/Android.bp
++++ /dev/null
+@@ -1,16 +0,0 @@
+-bootstrap_go_package {
+-    name: "soong-rockchip_prebuilt",
+-    pkgPath: "android/soong/rockchip_prebuilts",
+-    deps: [
+-        "blueprint",
+-        "blueprint-bootstrap",
+-        "soong",
+-        "soong-android",
+-        "soong-cc",
+-    ],
+-    srcs: [
+-        "prebuilt_lib.go",
+-        "prebuilt_obj.go",
+-    ],
+-    pluginFor: ["soong_build"],
+-}
+diff --git a/scripts/soong_rockchip_prebuilt/README.md b/scripts/soong_rockchip_prebuilt/README.md
+deleted file mode 100644
+index ed23eb3..0000000
+--- a/scripts/soong_rockchip_prebuilt/README.md
++++ /dev/null
+@@ -1,55 +0,0 @@
+-## Prebuilt modules written by Rockchip.
+-Example:
+-
+-- Shared libaries
+-```Android.bp
+-cc_rockchip_prebuilt_library_shared {
+-    name: "libteec",
+-    strip: {
+-        none: true,
+-    },
+-    check_elf_files: false,
+-    vendor: true,
+-    // optional
+-    optee: true,
+-    vpu: true,
+-}
+-```
+-Libs would be built:
+-    optee: true -> v1(or v2 only for RK3326)/arm(64)/$(name).so
+-    vpu: true -> arm(64)/mpp_dev(only for vpu2)/$(name).so
+-Libs would be placed:
+-    system(vendor)/lib(64)/$(name).so
+-
+-- Binaries
+-```Android.bp
+-cc_rockchip_prebuilt_binary {
+-    name: "tee-supplicant",
+-    strip: {
+-        none: true,
+-    },
+-    check_elf_files: false,
+-    vendor: true,
+-    optee: true,
+-}
+-```
+-Binaries would be built:
+-    optee: true -> v1(or v2 only for RK3326)/arm(64)/$(name)
+-Binaries would be placed:
+-    system(vendor)/bin/$(name)
+-
+-- Other files
+-```Android.bp
+-cc_rockchip_prebuilt_obj {
+-    name: "1.ta",
+-    src: "1.ta", // Will be set to $(name) if not set
+-    vendor: true,
+-    optee: true,
+-    sub_dir: "lib/optee_armtz",
+-}
+-```
+-Objects would be copy from:
+-    optee: true -> v1(or v2 only for RK3326)/ta/$(name) or $(src)
+-    optee: false -> $(name) or $(src)
+-Objects would be placed:
+-    system(vendor, recovery or ramdisk)/$(sub_dir)/$(name)
+diff --git a/scripts/soong_rockchip_prebuilt/prebuilt_lib.go b/scripts/soong_rockchip_prebuilt/prebuilt_lib.go
+deleted file mode 100644
+index 815d78b..0000000
+--- a/scripts/soong_rockchip_prebuilt/prebuilt_lib.go
++++ /dev/null
+@@ -1,227 +0,0 @@
+-package rockchip_prebuilts
+-
+-import (
+-    "android/soong/android"
+-    "android/soong/cc"
+-    "fmt"
+-    "strings"
+-)
+-
+-func isContain(items []string, item string) bool {
+-    for _, eachItem := range items {
+-        if eachItem == item {
+-            return true
+-        }
+-    }
+-    return false
+-}
+-
+-func getOpteePrefix(platform string) string {
+-    var optee_v2_list = []string{"rk3326", "rk3528", "rk356x","rk3562","rk3588"}
+-    if isContain(optee_v2_list, platform) {
+-        return "v2/"
+-    } else {
+-        return "v1/"
+-    }
+-}
+-
+-func getVpuPrefix(platform string) string {
+-    var vpu_v1_list = []string{"rk3126c", "rk3288", "rk3368"}
+-    if isContain(vpu_v1_list, platform) {
+-        return ""
+-    } else {
+-        return "mpp_dev/"
+-    }
+-}
+-
+-func init() {
+-    fmt.Println("Rockchip conditional compile")
+-    android.RegisterModuleType("cc_rockchip_prebuilt_library_shared", RockchipPrebuiltLibsFactory)
+-    android.RegisterModuleType("cc_rockchip_prebuilt_library_static", RockchipPrebuiltLibsStaticFactory)
+-}
+-
+-func RockchipPrebuiltLibsFactory() (android.Module) {
+-    // Register rockchip_prebuilt_libs factory as PrebuiltSharedLibraryFactory
+-    module := cc.PrebuiltSharedLibraryFactory()
+-
+-    // Add new props for rockchip conditional compile
+-    addon_props := &soongRockchipPrebuiltProperties{}
+-    module.AddProperties(addon_props)
+-
+-    // Add Hook for PrebuiltSharedLibraryFactory
+-    android.AddLoadHook(module, AppendMultilibs)
+-    return module
+-}
+-
+-func RockchipPrebuiltLibsStaticFactory() (android.Module) {
+-    // Register rockchip_prebuilt_libs factory as PrebuiltStaticLibraryFactory
+-    module := cc.PrebuiltStaticLibraryFactory()
+-
+-    // Add new props for rockchip conditional compile
+-    addon_props := &soongRockchipPrebuiltProperties{}
+-
+-    module.AddProperties(addon_props)
+-
+-    // Add Hook for PrebuiltStaticLibraryFactory
+-    //android.AddLoadHook(module, AppendArchStaticLibs)
+-    android.AddLoadHook(module, AppendArchStaticLibs)
+-    return module
+-}
+-
+-/* *
+- * For prebuilt binary and object
+- * optee --> srcs: v1(2)/arm(64)/$(name)
+- * optee --> srcs: arm(64)/$(name)
+- */
+-func ChangeSrcsPath(ctx android.LoadHookContext) {
+-    var prefix string = ""
+-    var module_name string = ctx.ModuleName()[9:]
+-    type props struct {
+-        Srcs []string
+-    }
+-    p := &props{}
+-    if (ctx.ContainsProperty("optee")) {
+-        prefix = getOpteePrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    if (strings.EqualFold(ctx.AConfig().DevicePrimaryArchType().String(),"arm64")) {
+-        prefix += "arm64/"
+-    } else {
+-        prefix += "arm/"
+-    }
+-    if (ctx.ContainsProperty("vpu")) {
+-        prefix += getVpuPrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    p.Srcs = append(p.Srcs, prefix + module_name)
+-    //fmt.Println("srcs: ", p.Srcs)
+-    ctx.AppendProperties(p)
+-}
+-
+-type Ex_srcs struct {
+-    Srcs []string
+-}
+-
+-type Ex_multilibType struct {
+-    Lib32 Ex_srcs
+-    Lib64 Ex_srcs
+-}
+-
+-type soongRockchipPrebuiltProperties struct {
+-    Optee bool
+-    Vpu bool
+-    Aiq bool
+-}
+-
+-func AppendMultilibs(ctx android.LoadHookContext) {
+-    if (strings.EqualFold(ctx.AConfig().DevicePrimaryArchType().String(),"arm64")) {
+-        type props struct {
+-            Compile_multilib *string
+-            Multilib Ex_multilibType
+-        }
+-        p := &props{}
+-        p.Compile_multilib = peferCompileMultilib(ctx)
+-        p.Multilib = configArm64Lib(ctx)
+-        ctx.AppendProperties(p)
+-    } else {
+-        type props struct {
+-            Compile_multilib *string
+-            Srcs []string
+-        }
+-        p := &props{}
+-        p.Compile_multilib = peferCompileMultilib(ctx)
+-        p.Srcs = configArmLib(ctx)
+-        ctx.AppendProperties(p)
+-    }
+-}
+-
+-func AppendArchStaticLibs(ctx android.LoadHookContext) {
+-        type props struct {
+-            Compile_multilib *string
+-            Multilib Ex_multilibType
+-        }
+-        p := &props{}
+-        p.Compile_multilib = peferCompileMultilib(ctx)
+-        p.Multilib = configArm64LibStatic(ctx)
+-        ctx.AppendProperties(p)
+-}
+-// Change the lib path, chose lib/lib64
+-func peferCompileMultilib(ctx android.LoadHookContext) (*string) {
+-    /*fmt.Println("TARGET_PRODUCT:", ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    fmt.Println("TARGET_ARCH:", ctx.AConfig().DevicePrimaryArchType().String())
+-    fmt.Println("MODULE NAME:", ctx.ModuleName()[9:]) // Skip 'prebuilt_'
+-    fmt.Println("isOptee:", ctx.ContainsProperty("optee"))*/
+-
+-    var compile_multilib string
+-    target_arch := ctx.AConfig().DevicePrimaryArchType().String()
+-    if (strings.EqualFold(target_arch,"arm64")) {
+-        compile_multilib = "both"
+-    } else {
+-        compile_multilib = "32"
+-    }
+-    //fmt.Println("compile_multilib:", compile_multilib)
+-    return &compile_multilib
+-}
+-
+-func configArm64Lib(ctx android.LoadHookContext) (Ex_multilibType) {
+-    var srcs []string
+-    var module_name string = ctx.ModuleName()[9:] + ".so"
+-    var multilib Ex_multilibType
+-    var prefix64 string = ""
+-    var prefix32 string = ""
+-    if (ctx.ContainsProperty("optee")) {
+-        prefix64 = getOpteePrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-        prefix32 = prefix64
+-    }
+-    prefix64 += "arm64/"
+-    prefix32 += "arm/"
+-    if (ctx.ContainsProperty("vpu")) {
+-        prefix64 += getVpuPrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-        prefix32 += getVpuPrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    multilib.Lib32.Srcs = append(srcs, prefix32 + module_name)
+-    multilib.Lib64.Srcs = append(srcs, prefix64 + module_name)
+-    //fmt.Println("multilib.lib32.srcs:", multilib.Lib32.Srcs )
+-    //fmt.Println("multilib.lib64.srcs:", multilib.Lib64.Srcs)
+-    return multilib
+-}
+-
+-func configArmLib(ctx android.LoadHookContext) ([]string) {
+-    var srcs []string
+-    //fmt.Println("TARGET_PRODUCT:", ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    var prefix string = ""
+-    var module_name string = ctx.ModuleName()[9:] + ".so"
+-    if (ctx.ContainsProperty("optee")) {
+-        prefix = getOpteePrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    prefix += "arm/"
+-    if (ctx.ContainsProperty("vpu")) {
+-        prefix += getVpuPrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    srcs = append(srcs, prefix + module_name)
+-    //fmt.Println("srcs:", srcs)
+-    return srcs
+-}
+-
+-func configArm64LibStatic(ctx android.LoadHookContext) (Ex_multilibType) {
+-    var srcs []string
+-    var module_name string = ctx.ModuleName()[9:] + ".a"
+-    var arch Ex_multilibType
+-    var prefix64 string = ""
+-    var prefix32 string = ""
+-    var suffix string = "."
+-    if (ctx.ContainsProperty("aiq")) {
+-        var platform = ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM")
+-        var rkaiq_list = []string{"rk356x", "rk3588", "rk3562"}
+-        if isContain(rkaiq_list, platform) {
+-            suffix += platform[2:]
+-        } else {
+-            suffix += "356x"
+-        }
+-    }
+-    prefix64 += "android/arm64/"
+-    prefix32 += "android/arm/"
+-    arch.Lib32.Srcs = append(srcs, prefix32 + module_name + suffix)
+-    arch.Lib64.Srcs = append(srcs, prefix64 + module_name + suffix)
+-    //fmt.Println("arch.arm.srcs:", arch.Lib32.Srcs )
+-    //fmt.Println("arch.arm64.srcs:", arch.Lib64.Srcs)
+-    return arch
+-}
+diff --git a/scripts/soong_rockchip_prebuilt/prebuilt_obj.go b/scripts/soong_rockchip_prebuilt/prebuilt_obj.go
+deleted file mode 100644
+index 429f34f..0000000
+--- a/scripts/soong_rockchip_prebuilt/prebuilt_obj.go
++++ /dev/null
+@@ -1,291 +0,0 @@
+-package rockchip_prebuilts
+-
+-import (
+-    "strconv"
+-    "strings"
+-    "android/soong/android"
+-)
+-
+-var pctx = android.NewPackageContext("android/soon/rockchip_prebuilts")
+-
+-func init() {
+-    pctx.Import("android/soong/android")
+-
+-    android.RegisterModuleType("cc_rockchip_prebuilt_obj", RockchipPrebuiltObjectFactory)
+-    android.RegisterModuleType("cc_rockchip_prebuilt_binary", RockchipPrebuiltBinFactory)
+-}
+-
+-type RockchipPrebuiltObjectProperties struct {
+-    // Source file of this prebuilt.
+-    Src *string `android:"path,arch_variant"`
+-
+-    // optional subdirectory under which this file is installed into
+-    Sub_dir *string `android:"arch_variant"`
+-
+-    // optional name for the installed file. If unspecified, name of the module is used as the file name
+-    Filename *string `android:"arch_variant"`
+-
+-    // when set to true, and filename property is not set, the name for the installed file
+-    // is the same as the file name of the source file.
+-    Filename_from_src *bool `android:"arch_variant"`
+-
+-    // Make this module available when building for ramdisk.
+-    Ramdisk_available *bool
+-
+-    // Make this module available when building for vendor ramdisk.
+-    // On device without a dedicated recovery partition, the module is only
+-    // available after switching root into
+-    // /first_stage_ramdisk. To expose the module before switching root, install
+-    // the recovery variant instead.
+-    Vendor_ramdisk_available *bool
+-
+-    // Make this module available when building for debug ramdisk.
+-    Debug_ramdisk_available *bool
+-
+-    // Make this module available when building for recovery.
+-    Recovery_available *bool
+-
+-    // Whether this module is directly installable to one of the partitions. Default: true.
+-    Installable *bool
+-
+-    // Whether this module is optee.
+-    Optee *bool
+-    Npu *bool
+-
+-    // Ignore the following properties because we want to keep compatible.
+-    Check_elf_files *bool
+-    Shared_libs []string `android:"arch_variant"`
+-    Strip stripAttributes
+-}
+-
+-type stripAttributes struct {
+-	//Keep_symbols                 *bool
+-	//Keep_symbols_and_debug_frame *bool
+-	//Keep_symbols_list            []string `android:"arch_variant"`
+-	All                          *bool
+-	None                         *bool
+-}
+-
+-type RockchipPrebuiltObjectModule interface {
+-    android.Module
+-    SubDir() string
+-    OutputFile() android.OutputPath
+-}
+-
+-type RockchipPrebuiltObject struct {
+-    android.ModuleBase
+-
+-    properties RockchipPrebuiltObjectProperties
+-
+-    sourceFilePath android.Path
+-    outputFilePath android.OutputPath
+-    // The base install location, e.g. "etc" for cc_rockchip_prebuilt_obj, "usr/share" for prebuilt_usr_share.
+-    installDirBase string
+-    // The base install location when soc_specific property is set to true, e.g. "firmware" for prebuilt_firmware.
+-    socInstallDirBase      string
+-    installDirPath         android.InstallPath
+-    additionalDependencies *android.Paths
+-    addArchToPrefix *bool
+-}
+-
+-func (p *RockchipPrebuiltObject) inRamdisk() bool {
+-    return p.ModuleBase.InRamdisk() || p.ModuleBase.InstallInRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) onlyInRamdisk() bool {
+-    return p.ModuleBase.InstallInRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) InstallInRamdisk() bool {
+-    return p.inRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) inRecovery() bool {
+-    return p.ModuleBase.InRecovery() || p.ModuleBase.InstallInRecovery()
+-}
+-
+-func (p *RockchipPrebuiltObject) onlyInRecovery() bool {
+-    return p.ModuleBase.InstallInRecovery()
+-}
+-
+-func (p *RockchipPrebuiltObject) InstallInRecovery() bool {
+-    return p.inRecovery()
+-}
+-
+-var _ android.ImageInterface = (*RockchipPrebuiltObject)(nil)
+-
+-func (p *RockchipPrebuiltObject) ImageMutatorBegin(ctx android.BaseModuleContext) {}
+-
+-func (p *RockchipPrebuiltObject) CoreVariantNeeded(ctx android.BaseModuleContext) bool {
+-    return !p.ModuleBase.InstallInRecovery() && !p.ModuleBase.InstallInRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) RamdiskVariantNeeded(ctx android.BaseModuleContext) bool {
+-    return android.Bool(p.properties.Ramdisk_available) || p.ModuleBase.InstallInRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) VendorRamdiskVariantNeeded(ctx android.BaseModuleContext) bool {
+-    return android.Bool(p.properties.Vendor_ramdisk_available) || p.ModuleBase.InstallInVendorRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) DebugRamdiskVariantNeeded(ctx android.BaseModuleContext) bool {
+-    return android.Bool(p.properties.Debug_ramdisk_available) || p.ModuleBase.InstallInDebugRamdisk()
+-}
+-
+-func (p *RockchipPrebuiltObject) RecoveryVariantNeeded(ctx android.BaseModuleContext) bool {
+-    return android.Bool(p.properties.Recovery_available) || p.ModuleBase.InstallInRecovery()
+-}
+-
+-func (p *RockchipPrebuiltObject) ExtraImageVariations(ctx android.BaseModuleContext) []string {
+-    return nil
+-}
+-
+-func (p *RockchipPrebuiltObject) SetImageVariation(ctx android.BaseModuleContext, variation string, module android.Module) {
+-}
+-
+-func (p *RockchipPrebuiltObject) DepsMutator(ctx android.BottomUpMutatorContext) {
+-    if p.properties.Src == nil {
+-        var new_src string = p.ModuleBase.BaseModuleName()
+-        p.properties.Src = &new_src
+-    }
+-}
+-
+-func (p *RockchipPrebuiltObject) SourceFilePath(ctx android.ModuleContext) android.Path {
+-    return android.PathForModuleSrc(ctx, android.String(p.properties.Src))
+-}
+-
+-func (p *RockchipPrebuiltObject) InstallDirPath() android.InstallPath {
+-    return p.installDirPath
+-}
+-
+-// This allows other derivative modules (e.g. cc_rockchip_prebuilt_obj_xml) to perform
+-// additional steps (like validating the src) before the file is installed.
+-func (p *RockchipPrebuiltObject) SetAdditionalDependencies(paths android.Paths) {
+-    p.additionalDependencies = &paths
+-}
+-
+-func (p *RockchipPrebuiltObject) OutputFile() android.OutputPath {
+-    return p.outputFilePath
+-}
+-
+-func (p *RockchipPrebuiltObject) SubDir() string {
+-    return android.String(p.properties.Sub_dir)
+-}
+-
+-func (p *RockchipPrebuiltObject) Installable() bool {
+-    return p.properties.Installable == nil || android.Bool(p.properties.Installable)
+-}
+-
+-func (p *RockchipPrebuiltObject) Optee() bool {
+-    return p.properties.Optee != nil && android.Bool(p.properties.Optee)
+-}
+-
+-func (p *RockchipPrebuiltObject) Npu() bool {
+-    return p.properties.Npu != nil && android.Bool(p.properties.Npu)
+-}
+-
+-func (p *RockchipPrebuiltObject) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+-    var prefix string = ""
+-    if (p.Npu()) {
+-        prefix = strings.ToUpper(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-        if (!strings.EqualFold("rk356x", prefix) && !strings.EqualFold("rk3588", prefix)) {
+-            prefix = "RK356X"
+-        }
+-        prefix += "/Android/rknn_server/"
+-    }
+-    if (p.Optee()) {
+-        prefix = getOpteePrefix(ctx.AConfig().Getenv("TARGET_BOARD_PLATFORM"))
+-    }
+-    if (android.Bool(p.addArchToPrefix)) {
+-        if (strings.EqualFold(ctx.AConfig().DevicePrimaryArchType().String(),"arm64")) {
+-            prefix += "arm64/"
+-        } else {
+-            prefix += "arm/"
+-        }
+-    }
+-    p.sourceFilePath = android.PathForModuleSrc(ctx, prefix + android.String(p.properties.Src))
+-    filename := android.String(p.properties.Filename)
+-    filename_from_src := android.Bool(p.properties.Filename_from_src)
+-    if filename == "" {
+-        if filename_from_src {
+-            filename = p.sourceFilePath.Base()
+-        } else {
+-            filename = ctx.ModuleName()
+-        }
+-    } else if filename_from_src {
+-        ctx.PropertyErrorf("filename_from_src", "filename is set. filename_from_src can't be true")
+-        return
+-    }
+-    p.outputFilePath = android.PathForModuleOut(ctx, filename).OutputPath
+-
+-    // If soc install dir was specified and SOC specific is set, set the installDirPath to the specified
+-    // socInstallDirBase.
+-    installBaseDir := p.installDirBase
+-    if ctx.SocSpecific() && p.socInstallDirBase != "" {
+-        installBaseDir = p.socInstallDirBase
+-    }
+-    p.installDirPath = android.PathForModuleInstall(ctx, installBaseDir, android.String(p.properties.Sub_dir))
+-
+-    // This ensures that outputFilePath has the correct name for others to
+-    // use, as the source file may have a different name.
+-    ctx.Build(pctx, android.BuildParams{
+-        Rule:   android.Cp,
+-        Output: p.outputFilePath,
+-        Input:  p.sourceFilePath,
+-    })
+-}
+-
+-func (p *RockchipPrebuiltObject) AndroidMkEntries() []android.AndroidMkEntries {
+-    nameSuffix := ""
+-    if p.inRamdisk() && !p.onlyInRamdisk() {
+-        nameSuffix = ".ramdisk"
+-    }
+-    if p.inRecovery() && !p.onlyInRecovery() {
+-        nameSuffix = ".recovery"
+-    }
+-    return []android.AndroidMkEntries{android.AndroidMkEntries{
+-        Class:      "ETC",
+-        SubName:    nameSuffix,
+-        OutputFile: android.OptionalPathForPath(p.outputFilePath),
+-        Required: p.properties.Shared_libs,
+-        ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+-            func(ctx android.AndroidMkExtraEntriesContext, entries *android.AndroidMkEntries) {
+-                entries.SetString("LOCAL_MODULE_TAGS", "optional")
+-                entries.SetString("LOCAL_MODULE_PATH", p.installDirPath.ToMakePath().String())
+-                entries.SetString("LOCAL_INSTALLED_MODULE_STEM", p.outputFilePath.Base())
+-                entries.SetString("LOCAL_UNINSTALLABLE_MODULE", strconv.FormatBool(!p.Installable()))
+-                entries.SetString("LOCAL_SHARED_LIBRARIES", strconv.FormatBool(!p.Installable()))
+-                if p.additionalDependencies != nil {
+-                    entries.AddStrings("LOCAL_ADDITIONAL_DEPENDENCIES", p.additionalDependencies.Strings()...)
+-                }
+-            },
+-        },
+-    }}
+-}
+-
+-func InitRockchipPrebuiltObjectModule(p *RockchipPrebuiltObject, dirBase string, addArch bool) {
+-    p.installDirBase = dirBase
+-    p.addArchToPrefix = &addArch
+-    p.AddProperties(&p.properties)
+-}
+-
+-// cc_rockchip_prebuilt_obj is for a prebuilt artifact that is installed in
+-// <partition>/<sub_dir> directory.
+-func RockchipPrebuiltObjectFactory() android.Module {
+-    module := &RockchipPrebuiltObject{}
+-    InitRockchipPrebuiltObjectModule(module, "", false)
+-    // This module is device-only
+-    android.InitAndroidArchModule(module, android.DeviceSupported, android.MultilibFirst)
+-    return module
+-}
+-
+-// cc_rockchip_prebuilt_binary is for a prebuilt artifact that is installed in
+-// <partition>/bin/<sub_dir> directory.
+-func RockchipPrebuiltBinFactory() android.Module {
+-    module := &RockchipPrebuiltObject{}
+-    InitRockchipPrebuiltObjectModule(module, "bin", true)
+-    // This module is device-only
+-    android.InitAndroidArchModule(module, android.DeviceSupported, android.MultilibFirst)
+-    return module
+-}
+-
+diff --git a/sepolicy/vendor/device.te b/sepolicy/vendor/device.te
+index 81afa8f..d11d310 100755
+--- a/sepolicy/vendor/device.te
++++ b/sepolicy/vendor/device.te
+@@ -32,8 +32,7 @@ type rpmb_block_device, dev_type;
+ #for cec
+ type cec_device, dev_type;
+ 
+-#for hid audio
+-type hidraw_device, dev_type;
++#for hid audio (hidraw_device declared in AOSP 14 public device.te)
+ 
+ #for hdcp2
+ type hdcp2_device, dev_type;
+diff --git a/sepolicy/vendor/file.te b/sepolicy/vendor/file.te
+index b12ae25..4903ab7 100755
+--- a/sepolicy/vendor/file.te
++++ b/sepolicy/vendor/file.te
+@@ -10,7 +10,7 @@ type sysfs_camera, fs_type, sysfs_type, mlstrustedobject;
+ type sysfs_hdmi, fs_type, sysfs_type, mlstrustedobject;
+ type sysfs_hdmirx, fs_type, sysfs_type, mlstrustedobject;
+ type sysfs_dev, fs_type, sysfs_type, mlstrustedobject;
+-type fuseblk, sdcard_type, fs_type, mlstrustedobject;
++# fuseblk declared in AOSP public file.te
+ type debugfs_sw_sync, fs_type, debugfs_type;
+ type sysfs_dmc, fs_type, sysfs_type;
+ type sysfs_mmc, fs_type, sysfs_type;
+diff --git a/sepolicy/vendor/file_contexts b/sepolicy/vendor/file_contexts
+index df01b25..cd3f172 100644
+--- a/sepolicy/vendor/file_contexts
++++ b/sepolicy/vendor/file_contexts
+@@ -247,3 +247,12 @@
+ /vendor/bin/hdcp2_tx_rx   u:object_r:hdcp2_exec:s0
+ /sys/devices/virtual/misc/hdmirx_hdcp/status   u:object_r:sysfs_hdmirx:s0
+ /sys/devices/virtual/misc/hdmirx_hdcp/test_key1x   u:object_r:sysfs_hdmirx:s0
++
++#composer3 hw hal (RK)
++/vendor/bin/hw/android\.hardware\.graphics\.composer3-service\.rockchip     u:object_r:hal_graphics_composer_default_exec:s0
++
++# AIDL OP-TEE Gatekeeper uses a different filename from the HIDL service.
++/(vendor|system/vendor)/bin/hw/android\.hardware\.gatekeeper-service\.optee    u:object_r:hal_gatekeeper_default_exec:s0
++
++# AIDL OP-TEE Weaver service.
++/(vendor|system/vendor)/bin/hw/android\.hardware\.weaver-service\.optee    u:object_r:hal_weaver_default_exec:s0
+diff --git a/sepolicy/vendor/genfs_contexts b/sepolicy/vendor/genfs_contexts
+index 3afdb03..d1bae2e 100644
+--- a/sepolicy/vendor/genfs_contexts
++++ b/sepolicy/vendor/genfs_contexts
+@@ -73,4 +73,4 @@ genfscon sysfs /devices/platform/fe330000.sdhci
+ 
+ genfscon sysfs_wakeup / u:object_r:sysfs_wakeup:s0
+ 
+-genfscon fuseblk / u:object_r:fuseblk:s0
++# genfscon fuseblk / — already declared in AOSP
+diff --git a/sepolicy/vendor/hal_drm_clearkey.te b/sepolicy/vendor/hal_drm_clearkey.te
+index 94d3c45..d7b3396 100644
+--- a/sepolicy/vendor/hal_drm_clearkey.te
++++ b/sepolicy/vendor/hal_drm_clearkey.te
+@@ -7,4 +7,4 @@ hal_server_domain(hal_drm_clearkey, hal_drm)
+ 
+ vndbinder_use(hal_drm_clearkey);
+ 
+-allow hal_drm_clearkey { appdomain -isolated_app }:fd use;
++allow hal_drm_clearkey { appdomain -isolated_app_all }:fd use;
+diff --git a/sepolicy/vendor/hal_graphics_allocator_default.te b/sepolicy/vendor/hal_graphics_allocator_default.te
+index 82f592b..607e4ed 100644
+--- a/sepolicy/vendor/hal_graphics_allocator_default.te
++++ b/sepolicy/vendor/hal_graphics_allocator_default.te
+@@ -1,6 +1,6 @@
+ typeattribute hal_graphics_allocator_default_tmpfs mlstrustedobject;
+ 
+-allow hal_graphics_allocator_client hal_graphics_allocator_default_tmpfs:file rw_file_perms;
++allow { hal_graphics_allocator_client -isolated_app_all } hal_graphics_allocator_default_tmpfs:file rw_file_perms;
+ allow hal_graphics_composer_default hal_graphics_allocator_default_tmpfs:file rw_file_perms;
+ 
+ rw_rockchip_graphic_device(hal_graphics_allocator_default)
+diff --git a/sepolicy/vendor/property.te b/sepolicy/vendor/property.te
+index 8a21cea..e60e495 100644
+--- a/sepolicy/vendor/property.te
++++ b/sepolicy/vendor/property.te
+@@ -15,3 +15,4 @@ vendor_restricted_prop(vendor_omx_prop)
+ vendor_restricted_prop(vendor_power_prop)
+ 
+ typeattribute vendor_system_public_prop mlstrustedobject;
++vendor_internal_prop(vendor_usb_prop)
+diff --git a/sepolicy/vendor/shell.te b/sepolicy/vendor/shell.te
+index 91888ae..c07650d 100755
+--- a/sepolicy/vendor/shell.te
++++ b/sepolicy/vendor/shell.te
+@@ -1,7 +1,6 @@
+ allow shell serial_device:chr_file rw_file_perms;
+ allow shell surfaceflinger:fifo_file rw_file_perms;
+ allow shell bootanim_exec:file getattr;
+-allow shell proc_cpuinfo:file mounton;
+ allow shell proc_kmsg:file getattr;
+ allow shell proc_iomem:file getattr;
+ allow shell proc_misc:file getattr;
+diff --git a/wifi_bt_common.mk b/wifi_bt_common.mk
+index 304e730..3911cb2 100644
+--- a/wifi_bt_common.mk
++++ b/wifi_bt_common.mk
+@@ -1,6 +1,7 @@
+ 
+ BOARD_CONNECTIVITY_VENDOR := Rockchip
+-BOARD_CONNECTIVITY_MODULE := ap6xxx
++BOARD_CONNECTIVITY_MODULE := aic8800
++BOARD_WLAN_DEVICE := wlan0
+ 
+ ifeq ($(strip $(BOARD_CONNECTIVITY_VENDOR)), Broadcom)
+ BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+@@ -38,17 +39,14 @@ endif
+ BOARD_HAVE_BLUETOOTH_AIC := true
+ 
+ ifeq ($(strip $(BOARD_CONNECTIVITY_VENDOR)), Rockchip)
+-BOARD_WLAN_DEVICE := auto
+-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_auto
+-BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_auto
++BOARD_WLAN_DEVICE := wlan0
++# AIC SDIO selects firmware internally; no Broadcom firmware switching sysfs.
++BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_aic
++BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_aic
+ PRODUCT_CFI_INCLUDE_PATHS   += hardware/rockchip/wifi/wpa_supplicant_8_lib
+ BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+ WPA_SUPPLICANT_VERSION      := VER_0_8_X
+ BOARD_HOSTAPD_DRIVER        := NL80211
+-WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/bcmdhd/parameters/firmware_path"
+-WIFI_DRIVER_FW_PATH_STA     := "/vendor/etc/firmware/fw_bcm4329.bin"
+-WIFI_DRIVER_FW_PATH_P2P     := "/vendor/etc/firmware/fw_bcm4329_p2p.bin"
+-WIFI_DRIVER_FW_PATH_AP      := "/vendor/etc/firmware/fw_bcm4329_apsta.bin"
+ BOARD_HAVE_BLUETOOTH := true
+ BOARD_HAVE_BLUETOOTH_BCM := false
+ BOARD_HAVE_BLUETOOTH_RTK := false

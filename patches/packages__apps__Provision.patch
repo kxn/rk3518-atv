@@ -1,0 +1,125 @@
+diff --git a/src/com/android/provision/DefaultActivity.java b/src/com/android/provision/DefaultActivity.java
+index 92720e3..03c489d 100644
+--- a/src/com/android/provision/DefaultActivity.java
++++ b/src/com/android/provision/DefaultActivity.java
+@@ -34,6 +34,13 @@ import android.content.ComponentName;
+ import android.content.Intent;
+ import android.content.pm.PackageManager;
+ import android.os.Bundle;
++import android.os.Build;
++import android.os.Handler;
++import android.os.Looper;
++import android.view.InputDevice;
++import android.view.Gravity;
++import android.view.WindowManager;
++import android.widget.TextView;
+ import android.provider.Settings;
+ import android.util.Log;
+ 
+@@ -69,6 +76,63 @@ public class DefaultActivity extends Activity {
+     private static final int RESULT_CODE_PROFILE_OWNER_SET = 122;
+     private static final int RESULT_CODE_DEVICE_OWNER_SET = 123;
+ 
++    private static final int REQUEST_REMOTE_SETUP = 45;
++    private boolean mWaitingForRemote;
++    private boolean mPairingLaunched;
++    private final Handler mRemoteHandler = new Handler(Looper.getMainLooper());
++
++    private boolean needsRemoteSetup() {
++        return "rk3528_box".equals(Build.DEVICE)
++                && Settings.Secure.getInt(getContentResolver(),
++                        Settings.Secure.USER_SETUP_COMPLETE, 0) == 0;
++    }
++
++    private boolean hasConnectedRemote() {
++        for (int id : InputDevice.getDeviceIds()) {
++            InputDevice device = InputDevice.getDevice(id);
++            if (device == null || device.isVirtual() || !device.isEnabled()) continue;
++            String name = device.getName();
++            if (name != null && (name.equalsIgnoreCase("Bluetooth remote")
++                    || name.regionMatches(true, 0, "Bluetooth remote ", 0, 17))
++                    && device.supportsSource(InputDevice.SOURCE_DPAD)) return true;
++        }
++        return false;
++    }
++
++    private void showRemoteSetup() {
++        mWaitingForRemote = true;
++        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
++        TextView instructions = new TextView(this);
++        instructions.setText("请先配对遥控器\n\n按住遥控器的配对组合键，直到指示灯持续闪烁。\n连接成功后自动继续。");
++        instructions.setTextSize(24);
++        instructions.setGravity(Gravity.CENTER);
++        setContentView(instructions);
++        if (!mPairingLaunched) {
++            Intent pairing = new Intent().setComponent(new ComponentName(
++                    "com.rockchip.remotesetup",
++                    "com.rockchip.remotesetup.PairActivity"));
++            pairing.putExtra("com.android.tv.settings.REQUIRED_REMOTE_SETUP", true);
++            try {
++                mPairingLaunched = true;
++                startActivityForResult(pairing, REQUEST_REMOTE_SETUP);
++            } catch (android.content.ActivityNotFoundException | SecurityException e) {
++                mPairingLaunched = false;
++                Log.e(TAG, "Remote setup activity unavailable; keep setup incomplete", e);
++            }
++        }
++    }
++
++    @Override
++    public void onBackPressed() {
++        if (!mWaitingForRemote) super.onBackPressed();
++    }
++
++    @Override
++    protected void onDestroy() {
++        mRemoteHandler.removeCallbacksAndMessages(null);
++        super.onDestroy();
++    }
++
+     private static final int REQUEST_CODE_STEP1 = 42;
+     private static final int REQUEST_CODE_STEP2_PO = 43;
+     private static final int REQUEST_CODE_STEP2_DO = 44;
+@@ -77,6 +141,7 @@ public class DefaultActivity extends Activity {
+     protected void onCreate(Bundle icicle) {
+         super.onCreate(icicle);
+ 
++        mPairingLaunched = icicle != null && icicle.getBoolean("remotePairingLaunched");
+         boolean provisionDeviceOwner = getSettings(getContentResolver(), SETTINGS_PROVISION_DO_MODE,
+                 DEFAULT_SETTINGS_PROVISION_DO_MODE) == 1;
+ 
+@@ -87,7 +152,21 @@ public class DefaultActivity extends Activity {
+         finishSetup();
+     }
+ 
++    @Override
++    protected void onSaveInstanceState(Bundle state) {
++        super.onSaveInstanceState(state);
++        state.putBoolean("remotePairingLaunched", mPairingLaunched);
++    }
++
+     private void finishSetup() {
++        if (needsRemoteSetup() && !hasConnectedRemote()) {
++            showRemoteSetup();
++            return;
++        }
++        mWaitingForRemote = false;
++        if ("rk3528_box".equals(Build.DEVICE)) {
++            Settings.Secure.putInt(getContentResolver(), "tv_user_setup_complete", 1);
++        }
+         setProvisioningState();
+         disableSelfAndFinish();
+     }
+@@ -148,6 +227,12 @@ public class DefaultActivity extends Activity {
+         Log.d(TAG, "onActivityResult(): request=" + requestCode + ", result="
+                 + resultCodeToString(resultCode) + ", data=" + data);
+ 
++        if (requestCode == REQUEST_REMOTE_SETUP) {
++            mPairingLaunched = false;
++            // Never trust RESULT_OK alone: require a real connected DPAD input.
++            mRemoteHandler.postDelayed(() -> { if (!isFinishing()) finishSetup(); }, 300);
++            return;
++        }
+         switch (requestCode) {
+             case REQUEST_CODE_STEP1:
+                 onProvisioningStep1Result(resultCode);

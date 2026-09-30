@@ -1,0 +1,22 @@
+# 验证范围
+
+当前源码对应 2026-09-30 v7 移植审计结果。
+
+已完成的历史验证：
+
+- 前一整机版本实际进入桌面，Wi-Fi、蓝牙遥控器配对/回连可用。
+- AllStream 在电视上 H.264 / HEVC 视频和 HDMI 音频播放。DRM4 格式修复解决黑视频；sw_sync
+  使用 /dev/sw_sync 解决绿色闪烁，用户复测确认改善。
+- 独立配对页的首次引导阻挡与已配对遥控器回连测试。
+- v7 新增遥控器状态机 16 项 host 回归；实际系统 UID 的 500 次软件 fence 压力检查。
+- v7 AIC 地址选择与 Bluetooth dump host ASAN/UBSAN 回归，HID 4 项和 L2CAP 6 项设备测试。
+- v7 各修改模块编译、8 个 super 分区解包/校验，ext4 e2fsck 与文件读回校验。
+
+发布工程的检查由 validation/source-export.json 和 CI 的主仓库检查记录补充。
+它们验证 manifest 锁定、补丁应用、覆盖完整性与脚本，不代替整机编译或设备测试。
+
+**尚未完成**：本次公开仓库从全新 repo sync 到所有镜像的完整 clean build；完整 v7 镜像刷入后的
+冷启动验收；广泛蓝牙设备/多电视/长时间视频回归；恢复分区修复；Google/CTS 认证。
+交付 v7 super 的参考 SHA256 是
+`75f509fc9c1f7eb6f94b83724210a759d830dd92fadc6df9681c4c0b19e2a28e`。
+它不是“源码构建必须生成该 hash”的宣称。

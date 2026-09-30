@@ -1,0 +1,126 @@
+[
+  {
+    "file": "rk3518_lpddr3_780MHz_primary_ddr111_usb104_spl107.bin",
+    "result": "PASS",
+    "crc32": "6752b2f6",
+    "ddr_parameter_changes": {
+      "lp3_freq": [
+        "1056",
+        "780"
+      ]
+    },
+    "entries": [
+      {
+        "name": "UsbHead",
+        "type": 1,
+        "offset": 444,
+        "size": 2048,
+        "delay_ms": 1,
+        "verified_source": "RKNS header"
+      },
+      {
+        "name": "rk3528_lp3_780_v1",
+        "type": 1,
+        "offset": 2492,
+        "size": 61440,
+        "delay_ms": 1,
+        "verified_source": "custom/rk3528_lp3_780_v1.11.bin"
+      },
+      {
+        "name": "rk3528_usbplug_v1",
+        "type": 2,
+        "offset": 63932,
+        "size": 92160,
+        "delay_ms": 0,
+        "verified_source": "bin/rk35/rk3528_usbplug_v1.04.bin"
+      },
+      {
+        "name": "FlashHead",
+        "type": 4,
+        "offset": 156092,
+        "size": 2048,
+        "delay_ms": 0,
+        "verified_source": "RKNS header"
+      },
+      {
+        "name": "FlashData",
+        "type": 4,
+        "offset": 158140,
+        "size": 61440,
+        "delay_ms": 0,
+        "verified_source": "custom/rk3528_lp3_780_v1.11.bin"
+      },
+      {
+        "name": "FlashBoot",
+        "type": 4,
+        "offset": 219580,
+        "size": 327680,
+        "delay_ms": 0,
+        "verified_source": "bin/rk35/rk3528_spl_v1.07.bin"
+      }
+    ],
+    "hardware_tested": false
+  },
+  {
+    "file": "rk3518_lpddr3_780MHz_fallback_ddr114_usb104_spl107.bin",
+    "result": "PASS",
+    "crc32": "ca822e6e",
+    "ddr_parameter_changes": {
+      "lp3_freq": [
+        "1056",
+        "780"
+      ]
+    },
+    "entries": [
+      {
+        "name": "UsbHead",
+        "type": 1,
+        "offset": 444,
+        "size": 2048,
+        "delay_ms": 1,
+        "verified_source": "RKNS header"
+      },
+      {
+        "name": "rk3528_lp3_780_v1",
+        "type": 1,
+        "offset": 2492,
+        "size": 61440,
+        "delay_ms": 1,
+        "verified_source": "custom/rk3528_lp3_780_v1.14.bin"
+      },
+      {
+        "name": "rk3528_usbplug_v1",
+        "type": 2,
+        "offset": 63932,
+        "size": 92160,
+        "delay_ms": 0,
+        "verified_source": "bin/rk35/rk3528_usbplug_v1.04.bin"
+      },
+      {
+        "name": "FlashHead",
+        "type": 4,
+        "offset": 156092,
+        "size": 2048,
+        "delay_ms": 0,
+        "verified_source": "RKNS header"
+      },
+      {
+        "name": "FlashData",
+        "type": 4,
+        "offset": 158140,
+        "size": 61440,
+        "delay_ms": 0,
+        "verified_source": "custom/rk3528_lp3_780_v1.14.bin"
+      },
+      {
+        "name": "FlashBoot",
+        "type": 4,
+        "offset": 219580,
+        "size": 327680,
+        "delay_ms": 0,
+        "verified_source": "bin/rk35/rk3528_spl_v1.07.bin"
+      }
+    ],
+    "hardware_tested": false
+  }
+]

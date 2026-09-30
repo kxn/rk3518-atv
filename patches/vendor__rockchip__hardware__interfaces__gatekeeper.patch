@@ -1,0 +1,10 @@
+diff --git a/android.hardware.gatekeeper-service.optee.rc b/android.hardware.gatekeeper-service.optee.rc
+index a74500c..9f6cfa5 100644
+--- a/android.hardware.gatekeeper-service.optee.rc
++++ b/android.hardware.gatekeeper-service.optee.rc
+@@ -1,4 +1,5 @@
+ service vendor.gatekeeper_default /vendor/bin/hw/android.hardware.gatekeeper-service.optee
++    interface aidl android.hardware.gatekeeper.IGatekeeper/default
+     class hal
+     user system
+     group system

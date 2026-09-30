@@ -1,0 +1,10 @@
+diff --git a/android.hardware.weaver-service.optee.rc b/android.hardware.weaver-service.optee.rc
+index a5d9108..b3f2255 100644
+--- a/android.hardware.weaver-service.optee.rc
++++ b/android.hardware.weaver-service.optee.rc
+@@ -1,4 +1,5 @@
+ service vendor.weaver_default /vendor/bin/hw/android.hardware.weaver-service.optee
++    interface aidl android.hardware.weaver.IWeaver/default
+     class hal
+     user hsm
+     group hsm

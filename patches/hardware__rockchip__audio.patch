@@ -1,0 +1,29 @@
+diff --git a/tinyalsa_hal/Android.mk b/tinyalsa_hal/Android.mk
+index 5908d60..1947717 100644
+--- a/tinyalsa_hal/Android.mk
++++ b/tinyalsa_hal/Android.mk
+@@ -131,6 +131,7 @@ include $(CLEAR_VARS)
+ LOCAL_MODULE := audio.primary.$(TARGET_BOARD_HARDWARE)
+ LOCAL_PROPRIETARY_MODULE := true
+ LOCAL_MODULE_RELATIVE_PATH := hw
++LOCAL_MULTILIB := 64
+ LOCAL_SRC_FILES := $(commonSrcFiles)
+ LOCAL_C_INCLUDES += $(commonCIncludes)
+ LOCAL_HEADER_LIBRARIES += libhardware_headers
+diff --git a/tinyalsa_hal/alsa_route.h b/tinyalsa_hal/alsa_route.h
+index 5b760ae..c4c1f44 100644
+--- a/tinyalsa_hal/alsa_route.h
++++ b/tinyalsa_hal/alsa_route.h
+@@ -50,3 +50,12 @@ int route_to_index(audio_devices_t device);
+ int route_to_incall(audio_devices_t device);
+ 
+ #endif
++
++/* Rockchip vendor audio device extensions (from RK-patched system/media):
++ * VX_ROCKCHIP_OUT_HDMI0 = 0x401u, VX_ROCKCHIP_OUT_SPDIF0 = 0x80001u */
++#ifndef VX_ROCKCHIP_OUT_HDMI0
++#define VX_ROCKCHIP_OUT_HDMI0 0x401u
++#endif
++#ifndef VX_ROCKCHIP_OUT_SPDIF0
++#define VX_ROCKCHIP_OUT_SPDIF0 0x80001u
++#endif

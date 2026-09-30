@@ -1,0 +1,18 @@
+diff --git a/rootdir/init.rc b/rootdir/init.rc
+index 8a2ed9f..a282373 100644
+--- a/rootdir/init.rc
++++ b/rootdir/init.rc
+@@ -1061,10 +1061,9 @@ on post-fs-data
+     # completed and apexd.status becomes "ready".
+     exec_start apexd-snapshotde
+ 
+-    # sys.memfd_use set to false by default, which keeps it disabled
+-    # until it is confirmed that apps and vendor processes don't make
+-    # IOCTLs on ashmem fds any more.
+-    setprop sys.use_memfd false
++    # Honor the product choice on kernels without ashmem. Keep the legacy
++    # default for products that have not opted in to memfd.
++    setprop sys.use_memfd ${sys.use_memfd:-false}
+ 
+     # Set fscklog permission
+     chown root system /dev/fscklogs/log

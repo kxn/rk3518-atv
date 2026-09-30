@@ -1,0 +1,154 @@
+diff --git a/apps/WifiDisplay/jni/Android.mk b/apps/WifiDisplay/jni/Android.mk
+index 5a40dd0..ad2ba32 100755
+--- a/apps/WifiDisplay/jni/Android.mk
++++ b/apps/WifiDisplay/jni/Android.mk
+@@ -33,7 +33,7 @@ LOCAL_C_INCLUDES += \
+ 	$(TOP)/frameworks/av/media/libstagefright/mpeg2ts
+ else
+ LOCAL_C_INCLUDES += \
+-	$(TOP)/frameworks/av/media/libstagefright/mpeg2ts/include/mpeg2ts
++	$(TOP)/frameworks/av/media/module/mpeg2ts/include/mpeg2ts
+ endif
+ 
+ LOCAL_SHARED_LIBRARIES:= \
+diff --git a/apps/WifiDisplay/jni/TunnelRenderer.cpp b/apps/WifiDisplay/jni/TunnelRenderer.cpp
+index be609b7..ced3b7e 100755
+--- a/apps/WifiDisplay/jni/TunnelRenderer.cpp
++++ b/apps/WifiDisplay/jni/TunnelRenderer.cpp
+@@ -44,7 +44,7 @@
+ #elif (PLATFORM_VERSION >= 12)
+ #include <ui/DisplayMode.h>
+ #else
+-#include <ui/DisplayInfo.h>
++#include <gui/DisplayInfo.h>
+ #endif
+ 
+ #define RTP_DEBUG 0
+@@ -983,13 +983,15 @@ void TunnelRenderer::initPlayer() {
+         CHECK_EQ(mComposerClient->initCheck(), (status_t)OK);
+ 
+ #if PLATFORM_SDK_VERSION >= 29
+-	sp<IBinder> display(SurfaceComposerClient::getInternalDisplayToken());
++	std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
++	CHECK(!displayIds.empty());
++	sp<IBinder> display(SurfaceComposerClient::getPhysicalDisplayToken(displayIds.front()));
+ #else
+     sp<IBinder> display(SurfaceComposerClient::getBuiltInDisplay(
+             ISurfaceComposer::eDisplayIdMain));
+ #endif
+ 
+-#if (PLATFORM_VERSION >= 12)
++#if (PLATFORM_SDK_VERSION >= 29)
+     CHECK(display != nullptr);
+     ui::DisplayMode mode;
+     CHECK_EQ(SurfaceComposerClient::getActiveDisplayMode(display, &mode), NO_ERROR);
+@@ -997,12 +999,6 @@ void TunnelRenderer::initPlayer() {
+     const ssize_t displayWidth = resolution.getWidth();
+     const ssize_t displayHeight = resolution.getHeight();
+     ALOGD("display is %zd x %zd\n", displayWidth, displayHeight);
+-#elif (PLATFORM_VERSION == 11)
+-    DisplayConfig config;
+-    CHECK_EQ(SurfaceComposerClient::getActiveDisplayConfig(display, &config), NO_ERROR);
+-    const ui::Size& resolution = config.resolution;
+-    int32_t displayWidth = resolution.getWidth();
+-    int32_t displayHeight = resolution.getHeight();
+ #else
+     DisplayInfo info;
+     SurfaceComposerClient::getDisplayInfo(display, &info);
+diff --git a/apps/WifiDisplay/jni/WifiDisplaySink.cpp b/apps/WifiDisplay/jni/WifiDisplaySink.cpp
+index b14209d..0446ced 100755
+--- a/apps/WifiDisplay/jni/WifiDisplaySink.cpp
++++ b/apps/WifiDisplay/jni/WifiDisplaySink.cpp
+@@ -48,12 +48,10 @@
+ #include <arpa/inet.h>
+ #include <cutils/properties.h>
+ #include <inttypes.h>
+-#if (PLATFORM_VERSION == 11)
+-#include <ui/DisplayConfig.h>
+-#elif (PLATFORM_VERSION >= 12)
++#if (PLATFORM_SDK_VERSION >= 29)
+ #include <ui/DisplayMode.h>
+ #else 
+-#include <ui/DisplayInfo.h>
++#include <gui/DisplayInfo.h>
+ #endif
+ 
+ #define SOCK_PATH "/data/data/wfd_socket"
+@@ -962,34 +960,29 @@ void WifiDisplaySink::onGetParameterRequest(
+     if(!find)
+     {
+ #if PLATFORM_SDK_VERSION >= 29
+-	  sp<IBinder> display(SurfaceComposerClient::getInternalDisplayToken()); 
++	  std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
++	  CHECK(!displayIds.empty());
++	  sp<IBinder> display(SurfaceComposerClient::getPhysicalDisplayToken(displayIds.front()));
+ #else
+           sp<IBinder> display(SurfaceComposerClient::getBuiltInDisplay(
+             ISurfaceComposer::eDisplayIdMain));
+ #endif
+ 
+-#if (PLATFORM_VERSION == 11)
+-    DisplayConfig config;
+-    CHECK_EQ(SurfaceComposerClient::getActiveDisplayConfig(display, &config), NO_ERROR);
+-    const ui::Size& resolution = config.resolution;
+-    const ssize_t displayWidth = resolution.getWidth();
+-    const ssize_t displayHeight = resolution.getHeight();
+-    float fps = config.refreshRate;
+-#elif (PLATFORM_VERSION >= 12)
++#if (PLATFORM_SDK_VERSION >= 29)
+     CHECK(display != nullptr);
+     ui::DisplayMode mode;
+     CHECK_EQ(SurfaceComposerClient::getActiveDisplayMode(display, &mode), NO_ERROR);
+     const ui::Size& resolution = mode.resolution;
+     const ssize_t displayWidth = resolution.getWidth();
+     const ssize_t displayHeight = resolution.getHeight();
+-    float fps = mode.refreshRate;
++    float fps = mode.peakRefreshRate;
+ #else
+     DisplayInfo info;
+     SurfaceComposerClient::getDisplayInfo(display, &info);
+     int32_t displayWidth ;
+     int32_t displayHeight ;
+     float fps = info.fps;
+-          
++
+     if(info.w > info.h)
+     {
+        displayWidth = (int32_t)info.w;
+@@ -999,7 +992,7 @@ void WifiDisplaySink::onGetParameterRequest(
+     {
+        displayWidth = (int32_t)info.h;
+        displayHeight = (int32_t)info.w;
+-    }	 
++    }
+ #endif
+          char parameterByte[3];  // for save the transfer byte modify by lance 2013.07.31
+          memset(parameterByte, 0, 3);
+diff --git a/gpu/Mali450.mk b/gpu/Mali450.mk
+index da2fe8e..5d547c6 100644
+--- a/gpu/Mali450.mk
++++ b/gpu/Mali450.mk
+@@ -4,9 +4,6 @@ ifeq ($(strip $(TARGET_ARCH)), x86)
+ PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcdc_composer=0
+ PRODUCT_PROPERTY_OVERRIDES += debug.hwui.render_dirty_regions=false
+ ifeq ($(strip $(GRAPHIC_MEMORY_PROVIDER)), dma_buf)
+-PRODUCT_COPY_FILES += \
+-    vendor/rockchip/common/gpu/Mali450/lib/$(TARGET_ARCH)/libGLES_mali.so:system/lib/egl/libGLES_mali.so \
+-    vendor/rockchip/common/gpu/Mali450/lib/$(TARGET_ARCH)/libGLES_mali.so:obj/lib/libGLES_mali.so \
+     vendor/rockchip/common/gpu/Mali450/lib/$(TARGET_ARCH)/hwuihas.bin:system/etc/hwuihas.bin \
+     vendor/rockchip/common/gpu/Mali450/lib/$(TARGET_ARCH)/hwuishader.bin:system/etc/hwuishader.bin 
+ PRODUCT_COPY_FILES += \
+@@ -19,13 +16,5 @@ PRODUCT_COPY_FILES += \
+ endif
+ endif
+ 
+-ifeq ($(strip $(TARGET_ARCH)), arm64)
+-PRODUCT_COPY_FILES += \
+-	vendor/rockchip/common/gpu/Mali450/lib/arm64/libGLES_mali.so:$(TARGET_COPY_OUT_VENDOR)/lib64/egl/libGLES_mali.so \
+-	vendor/rockchip/common/gpu/Mali450/lib/arm/libGLES_mali.so:$(TARGET_COPY_OUT_VENDOR)/lib/egl/libGLES_mali.so
+-else
+-PRODUCT_COPY_FILES += \
+-	vendor/rockchip/common/gpu/Mali450/lib/arm/libGLES_mali.so:$(TARGET_COPY_OUT_VENDOR)/lib/egl/libGLES_mali.so
+-endif
+ 
+ endif

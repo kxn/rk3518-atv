@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.input-cache/
+*.img
+*.apk
+*.apex
+loader/upstream/
+loader/delivery/
+loader/*-parameters.txt
+loader/primary_ddr111.ini
+loader/fallback_ddr114.ini
+loader/lpddr3-780-params.txt

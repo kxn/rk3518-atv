@@ -1,0 +1,72 @@
+[
+  {
+    "path": "frameworks/av",
+    "base": "4a1053e64dfbb720a8e8ba772f5d3dfd86cec214",
+    "patch": "patches/frameworks__av.patch"
+  },
+  {
+    "path": "frameworks/opt/net/wifi",
+    "base": "8ea518057eca198e286d4dab083a251383d9d5d5",
+    "patch": "patches/frameworks__opt__net__wifi.patch"
+  },
+  {
+    "path": "hardware/interfaces",
+    "base": "5ecadeb354186260fbf2cb223eb712c79b640119",
+    "patch": "patches/hardware__interfaces.patch"
+  },
+  {
+    "path": "packages/apps/Provision",
+    "base": "841d5199e1d1c64e7853fd953eed5247780908c1",
+    "patch": "patches/packages__apps__Provision.patch"
+  },
+  {
+    "path": "packages/apps/TvSettings",
+    "base": "a2daa6531bf8d731db20302b5850d839a134bb81",
+    "patch": "patches/packages__apps__TvSettings.patch"
+  },
+  {
+    "path": "system/core",
+    "base": "7d09db2d47ce283465c8644161f933b7c74d96f4",
+    "patch": "patches/system__core.patch"
+  },
+  {
+    "path": "device/rockchip/common",
+    "base": "24f7e6096659416c244b907a1a845739ddd8e966",
+    "patch": "patches/device__rockchip__common.patch"
+  },
+  {
+    "path": "device/rockchip/rk3528",
+    "base": "3d03c85edc624f52afab6b2cd5e97ba49887569f",
+    "patch": "patches/device__rockchip__rk3528.patch"
+  },
+  {
+    "path": "vendor/rockchip/common",
+    "base": "390dc01416bf545e0ccc2321bc7e0e5b17fedd07",
+    "patch": "patches/vendor__rockchip__common.patch"
+  },
+  {
+    "path": "vendor/rockchip/hardware/interfaces/gatekeeper",
+    "base": "570069c8e622a818ed7fcc3fa7aade544edee818",
+    "patch": "patches/vendor__rockchip__hardware__interfaces__gatekeeper.patch"
+  },
+  {
+    "path": "vendor/rockchip/hardware/interfaces/weaver",
+    "base": "9750b829056aa9630ef9da26fc5ccde4ffa60c2c",
+    "patch": "patches/vendor__rockchip__hardware__interfaces__weaver.patch"
+  },
+  {
+    "path": "vendor/rockchip/hardware/interfaces/codec2",
+    "base": "607f89a1c6786e87e4276e16b94e28fe0bfb797b",
+    "patch": "patches/vendor__rockchip__hardware__interfaces__codec2.patch"
+  },
+  {
+    "path": "vendor/rockchip/hardware/interfaces/rockit",
+    "base": "879ba298dbd8b53e88e9cfdcc26551e560e65c05",
+    "patch": "patches/vendor__rockchip__hardware__interfaces__rockit.patch"
+  },
+  {
+    "path": "hardware/rockchip/audio",
+    "base": "270df335adb8ead55ca3fbb7d7542bc433665439",
+    "patch": "patches/hardware__rockchip__audio.patch"
+  }
+]
