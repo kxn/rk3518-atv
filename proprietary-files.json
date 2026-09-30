@@ -27,7 +27,8 @@
       "path": "rockchip/common/hdr/vivid/arm/libhdr_params_parser.so"
     },
     "required": true,
-    "workspace_path": "src/aosp/hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm/libhdr_params_parser.so"
+    "workspace_path": "src/aosp/hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm/libhdr_params_parser.so",
+    "executable": true
   },
   {
     "path": "hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm64/libhdr_params_parser.so",
@@ -39,7 +40,8 @@
       "path": "rockchip/common/hdr/vivid/arm64/libhdr_params_parser.so"
     },
     "required": true,
-    "workspace_path": "src/aosp/hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm64/libhdr_params_parser.so"
+    "workspace_path": "src/aosp/hardware/rockchip/hwcomposer/drmhwc2/rockchip/common/hdr/vivid/arm64/libhdr_params_parser.so",
+    "executable": true
   },
   {
     "path": "hardware/rockchip/librga/docs/RGA_FAQ.assets/image-alpha-0x0.png",
@@ -1695,7 +1697,8 @@
       "path": "scripts/mkkrnlimg"
     },
     "required": true,
-    "workspace_path": "src/u-boot/scripts/mkkrnlimg"
+    "workspace_path": "src/u-boot/scripts/mkkrnlimg",
+    "executable": true
   },
   {
     "path": "rk3518-atv-u-boot/tools/binman/test/descriptor.bin",
@@ -1719,7 +1722,8 @@
       "path": "tools/binman/test/u_boot_no_ucode_ptr"
     },
     "required": true,
-    "workspace_path": "src/u-boot/tools/binman/test/u_boot_no_ucode_ptr"
+    "workspace_path": "src/u-boot/tools/binman/test/u_boot_no_ucode_ptr",
+    "executable": true
   },
   {
     "path": "rk3518-atv-u-boot/tools/binman/test/u_boot_ucode_ptr",
@@ -1731,7 +1735,8 @@
       "path": "tools/binman/test/u_boot_ucode_ptr"
     },
     "required": true,
-    "workspace_path": "src/u-boot/tools/binman/test/u_boot_ucode_ptr"
+    "workspace_path": "src/u-boot/tools/binman/test/u_boot_ucode_ptr",
+    "executable": true
   },
   {
     "path": "rk3518-atv-u-boot/tools/easylogo/linux_blackfin.tga",
@@ -1899,7 +1904,8 @@
       "path": "tools/logos/engicam.bmp"
     },
     "required": true,
-    "workspace_path": "src/u-boot/tools/logos/engicam.bmp"
+    "workspace_path": "src/u-boot/tools/logos/engicam.bmp",
+    "executable": true
   },
   {
     "path": "rk3518-atv-u-boot/tools/logos/esd.bmp",
@@ -2199,7 +2205,8 @@
       "url": "https://gitlab.com/rockchip_radxa_android13/rk/platform/vendor/rockchip/common.git",
       "revision": "390dc01416bf545e0ccc2321bc7e0e5b17fedd07",
       "path": "gpu/Mali450/lib/arm/libGLES_mali.so"
-    }
+    },
+    "executable": true
   },
   {
     "path": "vendor/rockchip/common/gpu/Mali450/lib/arm64/libGLES_mali.so",
@@ -2211,6 +2218,7 @@
       "url": "https://gitlab.com/rockchip_radxa_android13/rk/platform/vendor/rockchip/common.git",
       "revision": "390dc01416bf545e0ccc2321bc7e0e5b17fedd07",
       "path": "gpu/Mali450/lib/arm64/libGLES_mali.so"
-    }
+    },
+    "executable": true
   }
 ]

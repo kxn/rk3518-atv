@@ -771,5 +771,13 @@
     "mac_selection": "ASAN/UBSAN PASS",
     "bluetooth_dump_snapshot": "ASAN/UBSAN PASS"
   },
-  "loader_build": "Both pinned variants built; independent CRC, bounds, all six payloads and DDR parameter validation PASS"
+  "loader_build": "Both pinned variants built; independent CRC, bounds, all six payloads and DDR parameter validation PASS",
+  "bootstrap_subset_smoke": {
+    "apply_twice": "PASS",
+    "sha256_input_restore": "PASS",
+    "executable_mode": "PASS",
+    "preflight": "PASS",
+    "local_edit_guard": "PASS",
+    "scope": "14 clean-base patched projects plus public device repository; not a complete repo sync or clean firmware build"
+  }
 }

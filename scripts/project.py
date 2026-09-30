@@ -17,6 +17,33 @@ def load(name): return json.loads((HERE/name).read_text())
 def digest(path):
     with path.open('rb') as f: return hashlib.file_digest(f, 'sha256').hexdigest()
 
+def patch_state(work, item):
+    target=work/'src/aosp'/item['path']
+    patch=HERE/item['patch']
+    records=subprocess.check_output(['git','apply','--numstat','-z',str(patch)],cwd=target).decode().split('\0')
+    names={record.split('\t',2)[2] for record in records if record}
+    overlay=work/'src/device-support/overlays'/item['path']
+    if overlay.exists():names.update(str(p.relative_to(overlay)) for p in overlay.rglob('*') if p.is_file())
+    files={}
+    for name in sorted(names):
+        file=target/name
+        files[name]=dict(sha256=digest(file),executable=bool(file.stat().st_mode&0o111)) if file.is_file() else None
+    return dict(base=item['base'],patch_sha256=digest(patch),files=files)
+
+def saved_states(work):
+    file=work/'.rk3518-source-state.json'
+    return json.loads(file.read_text()) if file.is_file() else {}
+
+def applied(work,item,states):
+    # Product overlays may extend a patched file beyond the original patch's
+    # end-of-file context. Verify their saved content, not only reverse apply.
+    if item['path'] in states:
+        if states[item['path']]!=patch_state(work,item):
+            raise RuntimeError('Patched/overlaid files changed since preparation: '+item['path'])
+        return True
+    return subprocess.run(['git','apply','--reverse','--check',str(HERE/item['patch'])],
+                          cwd=work/'src/aosp'/item['path'],capture_output=True).returncode==0
+
 def destination(work, relative):
     result=(work/relative).resolve()
     if not result.is_relative_to(work.resolve()): raise ValueError('Path outside workspace: '+relative)
@@ -41,12 +68,13 @@ def native(work):
 
 def apply(work):
     aosp=work/'src/aosp'
+    states=saved_states(work)
     for item in load('patches/series.json'):
         target=destination(aosp,item['path'])
         if output('git','rev-parse','HEAD',cwd=target)!=item['base']:
             raise RuntimeError('Wrong base for '+item['path'])
         patch=HERE/item['patch']
-        if subprocess.run(['git','apply','--reverse','--check',str(patch)],cwd=target,capture_output=True).returncode==0:
+        if applied(work,item,states):
             print('Already applied:',item['path']); continue
         run('git','apply','--check',patch,cwd=target)
         run('git','apply',patch,cwd=target)
@@ -70,6 +98,10 @@ def apply(work):
     security=aosp/'device/rockchip/common/security'
     for ext in ('pk8','x509.pem'):
         shutil.copy2(aosp/('build/target/product/security/platform.'+ext),security/('nfc.'+ext))
+    states={item['path']:patch_state(work,item) for item in load('patches/series.json')}
+    state_file=work/'.rk3518-source-state.json'
+    temporary=state_file.with_suffix('.tmp')
+    temporary.write_text(json.dumps(states,indent=2)+'\n');temporary.replace(state_file)
     print('Applied patches and overlays. Development keys only; no OEM signing keys.')
 
 def inputs(work, supplied, fetch):
@@ -104,8 +136,10 @@ def check(work):
             'vendor/rockchip/common/wifi/firmware/fmacfw_8800d80_h_u02.bin']
     for name in checks:
         if not (aosp/name).is_file():raise RuntimeError('Missing '+name)
+    states=saved_states(work)
     for item in load('patches/series.json'):
-        run('git','apply','--reverse','--check',HERE/item['patch'],cwd=aosp/item['path'])
+        if output('git','rev-parse','HEAD',cwd=aosp/item['path'])!=item['base'] or not applied(work,item,states):
+            raise RuntimeError('Patch/base check failed: '+item['path'])
     if not (aosp/'packages/apps/BoxRemoteSetup/Android.bp').exists():raise RuntimeError('Missing remote setup')
     print('Pinned patches, runtime driver files and setup application are present.')
 
