@@ -8,3 +8,8 @@ jobs:
       - run: python3 scripts/check_repository.py
       - run: python3 -m py_compile scripts/*.py loader/*.py
       - run: bash -n scripts/*.sh
+      - run: |
+          cc -fsanitize=address,undefined -Wall -Wextra -Werror tests/wifi-mac-selection-test.c -o /tmp/mac-test
+          /tmp/mac-test
+          c++ -std=c++17 -pthread -fsanitize=address,undefined -Wall -Wextra -Werror tests/bt-dump-snapshot-test.cpp -o /tmp/dump-test
+          /tmp/dump-test
