@@ -1,0 +1,315 @@
+diff --git a/src/SDIO/driver_fw/aic/wlan/Android.mk b/src/SDIO/driver_fw/aic/wlan/Android.mk
+index 3992299..5053e7d 100644
+--- a/src/SDIO/driver_fw/aic/wlan/Android.mk
++++ b/src/SDIO/driver_fw/aic/wlan/Android.mk
+@@ -1,3 +1 @@
+-ifeq ($(BOARD_WLAN_DEVICE),aic)
+-    include $(call all-subdir-makefiles)
+-endif
++include $(call all-subdir-makefiles)
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.bp b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.bp
+new file mode 100644
+index 0000000..181400c
+--- /dev/null
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.bp
+@@ -0,0 +1,22 @@
++// AIC SDIO legacy HAL used by the AIDL Wi-Fi service on RK3528.
++cc_library_static {
++    name: "libwifi-hal-aic-sdio",
++    vendor: true,
++    srcs: [
++        "wifi_hal.cpp", "rtt.cpp", "common.cpp", "cpp_bindings.cpp",
++        "gscan.cpp", "link_layer_stats.cpp", "wifi_logger.cpp", "wifi_offload.cpp",
++    ],
++    cflags: [
++        "-Wall", "-Werror", "-Wno-format", "-Wno-reorder",
++        "-Wno-unused-function", "-Wno-unused-parameter",
++        "-Wno-unused-private-field", "-Wno-unused-variable",
++        "-include unistd.h",
++    ],
++    include_dirs: [
++        "external/libnl/include",
++        "hardware/libhardware_legacy/include/hardware_legacy",
++        "external/wpa_supplicant_8/src/drivers",
++    ],
++    header_libs: ["libutils_headers", "liblog_headers", "libhardware_legacy_headers"],
++    shared_libs: ["libnl", "libutils", "liblog"],
++}
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.mk b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.mk
+index 44c894a..d01e591 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.mk
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.mk
+@@ -59,14 +59,6 @@ L_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wno-macro-redefined
+ 
+ ########################
+ 
+-include $(CLEAR_VARS)
+-LOCAL_MODULE := lib_driver_cmd_aic
+-LOCAL_SHARED_LIBRARIES := libc libcutils
+-LOCAL_CFLAGS := $(L_CFLAGS)
+-LOCAL_SRC_FILES := $(WPA_SRC_FILE)
+-LOCAL_C_INCLUDES := $(WPA_SUPPL_DIR_INCLUDE)
+-LOCAL_VENDOR_MODULE := true
+-include $(BUILD_STATIC_LIBRARY)
+ 
+ ########################
+ 
+@@ -89,7 +81,7 @@ LOCAL_CFLAGS := \
+ 
+ LOCAL_C_INCLUDES += \
+ 	external/libnl/include \
+-	$(call include-path-for, libhardware_legacy)/hardware_legacy \
++	hardware/libhardware_legacy/include/hardware_legacy \
+ 	external/wpa_supplicant_8/src/drivers
+ 
+ LOCAL_HEADER_LIBRARIES := libutils_headers liblog_headers
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.h b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.h
+index cc51de3..ecfd877 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.h
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.h
+@@ -132,7 +132,6 @@ typedef enum {
+     GSCAN_SUBCMD_ANQPO_CONFIG,                          /* 0x1015 */
+     WIFI_SUBCMD_SET_RSSI_MONITOR,                       /* 0x1016 */
+     WIFI_SUBCMD_CONFIG_ND_OFFLOAD,                      /* 0x1017 */
+-    WIFI_SUBCMD_SET_LATENCY_MODE,                       /* 0x1018 */
+     /* Add more sub commands here */
+ 
+     GSCAN_SUBCMD_MAX,
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp
+index 881c77e..3b4a8f6 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp
+@@ -105,8 +105,7 @@ typedef enum wifi_attr {
+     ANDR_WIFI_ATTRIBUTE_PNO_RANDOM_MAC_OUI,
+     ANDR_WIFI_ATTRIBUTE_NODFS_SET,
+     ANDR_WIFI_ATTRIBUTE_COUNTRY,
+-    ANDR_WIFI_ATTRIBUTE_ND_OFFLOAD_VALUE,
+-    ANDR_WIFI_ATTRIBUTE_LATENCY_MODE, 
++    ANDR_WIFI_ATTRIBUTE_ND_OFFLOAD_VALUE
+     // Add more attribute here
+ } wifi_attr_t;
+ 
+@@ -241,8 +240,7 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *fn)
+     fn->wifi_get_packet_filter_capabilities = wifi_get_packet_filter_capabilities;
+     fn->wifi_get_wake_reason_stats = wifi_get_wake_reason_stats;
+     fn->wifi_set_packet_filter = wifi_set_packet_filter;
+-    fn->wifi_read_packet_filter = wifi_read_packet_filter;
+-    fn->wifi_set_latency_mode = wifi_set_latency_mode;
++	fn->wifi_read_packet_filter = wifi_read_packet_filter;
+ #ifdef WIFI_VIRTUAL_INTERFACE_SUPPORT
+     fn->wifi_virtual_interface_create = wifi_virtual_interface_create;
+     fn->wifi_virtual_interface_delete = wifi_virtual_interface_delete;
+@@ -1335,45 +1333,6 @@ public:
+ };
+ #endif
+ 
+-/////////////////////////////////////////////////////////////////////
+-
+-class SetLatencyModeCommand : public WifiCommand {
+-private:
+-    u32 mLatencyMode;
+-public:
+-    SetLatencyModeCommand(wifi_interface_handle handle, u32 LatencyMode)
+-        : WifiCommand("SetLatencyModeCommand", handle, 0) {
+-            mLatencyMode = LatencyMode;
+-    }
+-
+-    virtual int create() {
+-	    int ret;
+-
+-	    /* Check for invalid latency Mode */
+-	    if ((mLatencyMode != WIFI_LATENCY_MODE_NORMAL) &&
+-			    (mLatencyMode != WIFI_LATENCY_MODE_LOW)) {
+-		    ALOGE("SetLatencyModeCommand: Invalid mode: %d", mLatencyMode);
+-		    return WIFI_ERROR_UNKNOWN;
+-	    }
+-
+-	    ret = mMsg.create(GOOGLE_OUI, WIFI_SUBCMD_SET_LATENCY_MODE);
+-	    if (ret < 0) {
+-		    ALOGE("Can't create message to send to driver - %d", ret);
+-		    return ret;
+-	    }
+-
+-	    nlattr *data = mMsg.attr_start(NL80211_ATTR_VENDOR_DATA);
+-	    ret = mMsg.put_u32(ANDR_WIFI_ATTRIBUTE_LATENCY_MODE, mLatencyMode);
+-	    if (ret < 0) {
+-		    return ret;
+-	    }
+-
+-	    mMsg.attr_end(data);
+-	    return WIFI_SUCCESS;
+-    }
+-
+-};
+-
+ static int wifi_get_multicast_id(wifi_handle handle, const char *name, const char *group)
+ {
+     GetMulticastIdCommand cmd(handle, name, group);
+@@ -1612,13 +1571,6 @@ static wifi_error wifi_configure_nd_offload(wifi_interface_handle handle, u8 ena
+     return (wifi_error) command.requestResponse();
+ }
+ 
+-wifi_error wifi_set_latency_mode(wifi_interface_handle handle, wifi_latency_mode mode)
+-{
+-    ALOGD("Setting Wifi Latency mode, halHandle = %p LatencyMode = %d\n", handle, mode);
+-    SetLatencyModeCommand command(handle, mode);
+-    return (wifi_error) command.requestResponse();
+-}
+-
+ #ifdef WIFI_VIRTUAL_INTERFACE_SUPPORT
+ wifi_error wifi_virtual_interface_create(wifi_handle handle,
+                                          const char* ifname,
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp
+index ce4fc13..7f55a9d 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp
+@@ -31,12 +31,8 @@
+ #include <netlink/object-api.h>
+ #include <netlink/netlink.h>
+ #include <netlink/socket.h>
+-#if __has_include(<netlink-private/types.h>)
+ #include <netlink-private/object-api.h>
+ #include <netlink-private/types.h>
+-#else
+-#include <nl-priv-dynamic-core/nl-core.h>
+-#endif
+ 
+ #include "nl80211_copy.h"
+ #include "sync.h"
+diff --git a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp
+index 6c31ac5..bc637e1 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp
++++ b/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp
+@@ -31,12 +31,9 @@
+ #include <netlink/object-api.h>
+ #include <netlink/netlink.h>
+ #include <netlink/socket.h>
+-#if __has_include(<netlink-private/types.h>)
+ #include <netlink-private/object-api.h>
+ #include <netlink-private/types.h>
+-#else
+-#include <nl-priv-dynamic-core/nl-core.h>
+-#endif
++
+ 
+ #include "nl80211_copy.h"
+ #include "sync.h"
+diff --git a/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/Android.mk b/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/Android.mk
+index 813b5c6..5ae8c45 100644
+--- a/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/Android.mk
++++ b/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/Android.mk
+@@ -1,65 +1,26 @@
+-#
+-# Copyright (C) 2008 The Android Open Source Project
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#      http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-#
+ LOCAL_PATH := $(call my-dir)
+ 
+ ifeq ($(WPA_SUPPLICANT_VERSION),VER_0_8_X)
+-
+ ifneq ($(BOARD_WPA_SUPPLICANT_DRIVER),)
+   CONFIG_DRIVER_$(BOARD_WPA_SUPPLICANT_DRIVER) := y
+ endif
+ 
+ WPA_SUPPL_DIR = external/wpa_supplicant_8
+ WPA_SRC_FILE :=
+-
+ include $(WPA_SUPPL_DIR)/wpa_supplicant/android.config
+ 
+-WPA_SUPPL_DIR_INCLUDE = $(WPA_SUPPL_DIR)/src \
+-	$(WPA_SUPPL_DIR)/src/common \
+-	$(WPA_SUPPL_DIR)/src/drivers \
+-	$(WPA_SUPPL_DIR)/src/l2_packet \
+-	$(WPA_SUPPL_DIR)/src/utils \
+-	$(WPA_SUPPL_DIR)/src/wps \
+-	$(WPA_SUPPL_DIR)/wpa_supplicant
++WPA_SUPPL_DIR_INCLUDE = $(WPA_SUPPL_DIR)/src 	$(WPA_SUPPL_DIR)/src/common 	$(WPA_SUPPL_DIR)/src/drivers 	$(WPA_SUPPL_DIR)/src/l2_packet 	$(WPA_SUPPL_DIR)/src/utils 	$(WPA_SUPPL_DIR)/src/wps 	$(WPA_SUPPL_DIR)/wpa_supplicant
+ 
+ ifdef CONFIG_DRIVER_NL80211
+ WPA_SUPPL_DIR_INCLUDE += external/libnl/include
+ WPA_SRC_FILE += driver_cmd_nl80211.c
+ endif
+ 
+-ifdef CONFIG_DRIVER_WEXT
+-WPA_SRC_FILE += driver_cmd_wext.c
+-endif
+-
+-ifeq ($(TARGET_ARCH),arm)
+-# To force sizeof(enum) = 4
+-L_CFLAGS += -mabi=aapcs-linux
+-endif
+-
+ ifdef CONFIG_ANDROID_LOG
+ L_CFLAGS += -DCONFIG_ANDROID_LOG
+ endif
+-
+-ifdef CONFIG_P2P
+-L_CFLAGS += -DCONFIG_P2P
+-endif
+-
+ L_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wno-macro-redefined
+ 
+-########################
+-
+ include $(CLEAR_VARS)
+ LOCAL_MODULE := lib_driver_cmd_aic
+ LOCAL_SHARED_LIBRARIES := libc libcutils
+@@ -67,8 +28,8 @@ LOCAL_CFLAGS := $(L_CFLAGS)
+ LOCAL_SRC_FILES := $(WPA_SRC_FILE)
+ LOCAL_C_INCLUDES := $(WPA_SUPPL_DIR_INCLUDE)
+ LOCAL_VENDOR_MODULE := true
++# Called through a CFI-checked driver_ops function pointer in supplicant.
++LOCAL_SANITIZE := cfi
+ include $(BUILD_STATIC_LIBRARY)
+ 
+-########################
+-
+ endif
+diff --git a/src/libbt-vendor/aicbt/libbt/src/hardware_uart.c b/src/libbt-vendor/aicbt/libbt/src/hardware_uart.c
+index 35d0f35..b3d7f03 100644
+--- a/src/libbt-vendor/aicbt/libbt/src/hardware_uart.c
++++ b/src/libbt-vendor/aicbt/libbt/src/hardware_uart.c
+@@ -295,12 +295,19 @@ void hw_uart_config_cback(void *p_mem)
+ 				AICBTDBG(LOGINFO, "Controller OTP bdaddr %02X:%02X:%02X:%02X:%02X:%02X",
+ 						*(p_tmp+5), *(p_tmp+4), *(p_tmp+3),
+ 						*(p_tmp+2), *(p_tmp+1), *p_tmp);
++                /* Preserve the stable HAL bootstrap address if OTP is blank. */
++                const uint8_t erased_bdaddr[BD_ADDR_LEN] = {255,255,255,255,255,255};
++                if (memcmp(p_tmp, null_bdaddr, BD_ADDR_LEN) != 0 &&
++                    memcmp(p_tmp, erased_bdaddr, BD_ADDR_LEN) != 0) {
+ 				vnd_local_bd_addr[0] = *(p_tmp+5);
+ 				vnd_local_bd_addr[1] = *(p_tmp+4);
+ 				vnd_local_bd_addr[2] = *(p_tmp+3);
+ 				vnd_local_bd_addr[3] = *(p_tmp+2);
+ 				vnd_local_bd_addr[4] = *(p_tmp+1);
+ 				vnd_local_bd_addr[5] = *(p_tmp);
++                } else {
++                    AICBTDBG(LOGINFO, "Blank controller OTP; keeping stable bootstrap address");
++                }
+ 
+ 				if ((is_proceeding = hw_config_set_bdaddr(p_buf)) == TRUE)
+ 					break;
+diff --git a/src/libbt-vendor/aicbt/vendor/etc/bluetooth/aicbt.conf b/src/libbt-vendor/aicbt/vendor/etc/bluetooth/aicbt.conf
+index 7e74a91..5611c88 100644
+--- a/src/libbt-vendor/aicbt/vendor/etc/bluetooth/aicbt.conf
++++ b/src/libbt-vendor/aicbt/vendor/etc/bluetooth/aicbt.conf
+@@ -7,7 +7,7 @@ DevClassMajorClass=0x01
+ DevClassMinorClass=0x1C
+ 
+ #Indicate USB or UART driver bluetooth
+-BtDeviceNode=?/dev/ttyS1:H4
++BtDeviceNode=?/dev/ttyS2:H4
+ 
+ # Enable BtSnoop logging function
+ # valid value : true, false

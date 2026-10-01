@@ -1,33 +1,15 @@
 [
   {
-    "repo": "rk3518-atv-bluetooth",
     "path": "src/aosp/packages/modules/Bluetooth",
-    "url": "https://github.com/kxn/rk3518-atv-bluetooth.git",
-    "revision": "f10a6029873277be263eddc4d4d329e4f18cb66c",
-    "upstream": "https://android.googlesource.com/platform/packages/modules/Bluetooth",
-    "upstream_revision": "de2248e503812528d440d0717e76b84148a92e56",
-    "import_base": "285e05ff3d40405a915f784ed8334f6d56a50b27",
-    "history": "source snapshot"
+    "url": "https://android.googlesource.com/platform/packages/modules/Bluetooth",
+    "revision": "de2248e503812528d440d0717e76b84148a92e56",
+    "history": "pinned upstream plus patches"
   },
   {
-    "repo": "rk3518-atv-u-boot",
     "path": "src/u-boot",
-    "url": "https://github.com/kxn/rk3518-atv-u-boot.git",
-    "revision": "599a1981810f01af5caa26c2453c0b651594d1be",
-    "upstream": "https://gitlab.com/rockchip_radxa_android13/rk/u-boot.git",
-    "upstream_revision": "f182af929fc80d51685b117b3185e6a2e5c17853",
-    "import_base": "66c9feb43d8e49653f0a495b18a2e5777daefc10",
-    "history": "source snapshot"
-  },
-  {
-    "repo": "rk3518-atv-hwcomposer",
-    "path": "src/aosp/hardware/rockchip/hwcomposer",
-    "url": "https://github.com/kxn/rk3518-atv-hwcomposer.git",
-    "revision": "0258c0788410853dd5f24f4e3dd33575ed10b928",
-    "upstream": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk35/hwcomposer2.git",
-    "upstream_revision": "f8586c8a417f67d38513cc04d0ff2c004be37ff8",
-    "import_base": "d2e4d6f8bce20c77e43d672de53516e3e93e425b",
-    "history": "source snapshot"
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/u-boot.git",
+    "revision": "f182af929fc80d51685b117b3185e6a2e5c17853",
+    "history": "pinned upstream plus patches"
   },
   {
     "repo": "rk3518-atv-kernel",
@@ -81,13 +63,31 @@
     "repo": "rk3518-atv-device",
     "path": "src/device-support",
     "url": "https://github.com/kxn/rk3518-atv-device.git",
-    "revision": "9a9fa4a5436132349e901d74403a7923ea7cc027",
-    "history": "project-owned source and attributed overlays"
+    "revision": "80070bca8f6bfcf4ec5434af595172af92252899",
+    "history": "project-owned application, board configuration and minimal overlays"
   },
   {
     "path": "src/rkbin",
     "url": "https://gitlab.com/rockchip_radxa_android13/rk/rkbin.git",
     "revision": "4c4e34a4cec9ff2ed25ea3a781653db3aeb0ce5c",
     "history": "pinned upstream"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/hwcomposer/drmhwc2",
+    "url": "https://gitlab.com/rockchip_radxa_android13/rk/hardware/rk35/hwcomposer2.git",
+    "revision": "f8586c8a417f67d38513cc04d0ff2c004be37ff8",
+    "history": "pinned upstream plus patches"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/hwcomposer/hwc3",
+    "url": "https://gitlab.com/rockchip_android14_radxa_rkr6/rk/hardware/rk35/hwcomposer3.git",
+    "revision": "c2ce1c4346ac15c6b2bc7df1a2f868874cf3b75d",
+    "history": "unmodified pinned upstream"
+  },
+  {
+    "path": "src/aosp/hardware/rockchip/librga",
+    "url": "https://gitlab.com/rockchip_android14_radxa_rkr6/linux/linux-rga.git",
+    "revision": "a5444901f6c0164ea1738af16b4991774db95be1",
+    "history": "pinned upstream plus patches"
   }
 ]

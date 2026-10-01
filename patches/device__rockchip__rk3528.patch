@@ -203,7 +203,9 @@ index b12622b..f5cb5e8 100755
 +key 185   PROG_YELLOW
 \ No newline at end of file
 diff --git a/rk3528_box/rk3528_box.mk b/rk3528_box/rk3528_box.mk
-index 8fa1f32..a5bfeb4 100755
+old mode 100755
+new mode 100644
+index 8fa1f32..e3b25b6
 --- a/rk3528_box/rk3528_box.mk
 +++ b/rk3528_box/rk3528_box.mk
 @@ -23,12 +23,21 @@
@@ -239,7 +241,7 @@ index 8fa1f32..a5bfeb4 100755
  PRODUCT_NAME := rk3528_box
  PRODUCT_DEVICE := rk3528_box
  PRODUCT_BRAND := RockChip
-@@ -54,3 +67,18 @@ PRODUCT_AAPT_PREF_CONFIG := tvdpi
+@@ -54,3 +67,23 @@ PRODUCT_AAPT_PREF_CONFIG := tvdpi
  # TV Input HAL
  PRODUCT_PACKAGES += \
      android.hardware.tv.input@1.0-impl
@@ -258,3 +260,8 @@ index 8fa1f32..a5bfeb4 100755
 +PRODUCT_SYSTEM_PROPERTIES += ro.adb.secure=0
 +
 +# Built against the RK3518 6.1.172 kernel; stable per-board Wi-Fi identity.
++
++# Generated with the same kernel configuration by the public build script.
++BOARD_VENDOR_KERNEL_MODULES += \
++    device/rockchip/rk3528/rk3528_box/modules/aic8800_bsp.ko \
++    device/rockchip/rk3528/rk3528_box/modules/aic8800_fdrv.ko

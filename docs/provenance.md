@@ -1,19 +1,22 @@
 # 来源与许可
 
 固定版本：`default.xml`、`sources.lock.json`。小改动：`patches/series.json`。
-核心组件仓库 `PORT_ORIGIN.md` 标明上游 URL 和基准提交。
+直接上游组件的 URL/提交记录在锁文件中；真实 fork 的 `PORT_ORIGIN.md` 保留祖先提交信息。
+路径重定位通过 `source-imports.json` 明确列出；不在设备仓库重复导入第三方源码。
 
 - AOSP：android.googlesource.com，android-14.0.0_r75 的实际检出提交。
 - 内核：rockchip-linux/kernel，develop-6.1，保留 GPL/SPDX 与上游历史。
 - AIC SDIO：radxa-pkg/aic8800，保留上游历史、文件许可；本项目添加平台构建和稳定 MAC 选择。
 - Rockchip 产品、HWC2、Utgard gralloc、U-Boot：公开的 rockchip_radxa_android13 GitLab BSP。
 - Rockchip 音频、tinyalsa、speex、Codec2、Rockit、Gatekeeper、Weaver：公开的 rockchip_android14_radxa_rkr6 GitLab BSP。
-- `hardware/aic`：AIC SDK Android HAL 源码快照，保留 Aicsemi/AOSP 文件许可及发布版本注释。
-  可公开核对的参考 SDK 是 gtxaspec/aic8800-wifi；并非整个目录与该 SDK 提交逐文件相同。
-- `hardware/rockchip/librga`：原工作树中手工复制的 Android 14 Rockchip 源码，保留 Rockchip 的 Apache-2.0
-  COPYING、版权头和当前文件内容。其精确原始 Git 提交未保留下来；这里作为注明来源的源码快照发布，
-  不虚构与旧 librga-old 或仅含预编译库的 aiRockchip 仓库的提交对应关系。
-- `soong_rockchip_prebuilt`：从 device/rockchip/common 原目录迁移的 Soong 插件。
+- `hardware/aic`：精确来源为 radxa-pkg/aic8800 的 `src/libbt-vendor/aicbt` 和
+  `src/SDIO/driver_fw/aic/wlan`；取自锁定的 AIC SDK fork，补丁为 `aic-android-hal.patch`。
+- `hardware/rockchip/librga`：直接引用 rockchip_android14_radxa_rkr6/linux/linux-rga 的
+  `a5444901f6c0164ea1738af16b4991774db95be1`；243 个原文件中仅 Android.go 有改动。
+- HWC2：直接引用 Android 13 BSP 的 `f8586c8a417f67d38513cc04d0ff2c004be37ff8`，修改保存在补丁中。
+- HWC3：直接引用 Android 14 BSP 的 `c2ce1c4346ac15c6b2bc7df1a2f868874cf3b75d`，无修改。
+- `soong_rockchip_prebuilt`：从 device/rockchip/common 的固定上游树提取；原位置保留源码，
+  修改和禁用旧模块入口记录在该项目补丁中，以免 Soong 重复注册。
 - `BoxRemoteSetup`：本项目实现；参考原厂行为分析，没有拷贝或分发原厂 BTHelp/Google TV APK。
 
 本仓库 Apache-2.0 LICENSE 只适用于本项目新增的脚本/文档；补丁中被修改的代码继续适用其原有许可。
@@ -23,5 +26,8 @@
 Mali450 等许可未在本次移植中重新确认，使用者应依据自己的 SDK 授权取得。
 支持从有权使用的本地文件导入，导入前强制 SHA256；没有原厂账户/密钥/个人数据下载步骤。
 
-清单中 `required=false` 的项属于源码测试、样例、文档资源或可重新编译的 DTB，未作为固件构建的外部输入。
-Mali 与当前 HWC HDR/parser、AIC 固件是运行时输入；不能用空占位文件代替。
+外部输入清单只保留 12 个 AIC 固件和两个 Mali 库。其余未修改的上游资源由 Git 直接提供，
+包括 HWC HDR/parser；不能用空占位文件代替运行时输入。
+
+source-preview-v7.2 修正了之前快照发布的组织方式。旧 tag 和归档仓库仅供历史追溯，
+当前 manifest 不再引用它们；没有通过改写旧历史掩盖此前的发布。

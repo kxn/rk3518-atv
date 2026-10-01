@@ -1393,12 +1393,11 @@
   <project name="rockchip_android14_radxa_rkr6/rk/hardware/rk29/audio" path="hardware/rockchip/audio" remote="gitlab" revision="270df335adb8ead55ca3fbb7d7542bc433665439" />
   <project name="rockchip_android14_radxa_rkr6/rk/hardware/rk29/hdmicec" path="hardware/rockchip/hdmicec" remote="gitlab" revision="341141bef01522800fa54b0cfa8009bd548409c1" />
   <project name="rockchip_radxa_android13/rk/hardware/rk35/helper" path="hardware/rockchip/helper" remote="gitlab" revision="8ebaeb1c03ace90f8c5fc8caa5a7ebf8c19fc229" />
-  <project name="kxn/rk3518-atv-hwcomposer" path="hardware/rockchip/hwcomposer" remote="github" revision="0258c0788410853dd5f24f4e3dd33575ed10b928" />
   <project name="rockchip_radxa_android13/rk/hardware/rk29/libbaseparameter" path="hardware/rockchip/libbaseparameter" remote="gitlab" revision="b7a8a8ceb378bd99ffc68649e6b777cabab22fdf" />
   <project name="rockchip_radxa_android13/rk/hardware/libgralloc/utgard_new" path="hardware/rockchip/libgralloc" remote="gitlab" revision="4d3e2636db95909f56f604dbe5f276016e0c72fe" />
   <project name="rockchip_radxa_android13/rk/hardware/rk29/libgraphicpolicy" path="hardware/rockchip/libgraphicpolicy" remote="gitlab" revision="deca46dbd76d00c4b1eeca02c2f20c92282dcc36" />
   <project name="rockchip_radxa_android13/rk/hardware/rk35/libhardware_rockchip" path="hardware/rockchip/libhardware_rockchip" remote="gitlab" revision="4fdef9a5d69d8da9cdf074907650c96021881a5b" />
-  <project name="kxn/rk3518-atv-bluetooth" path="packages/modules/Bluetooth" remote="github" revision="f10a6029873277be263eddc4d4d329e4f18cb66c" />
+  <project name="platform/packages/modules/Bluetooth" path="packages/modules/Bluetooth" remote="aosp" revision="de2248e503812528d440d0717e76b84148a92e56" />
   <project name="rockchip_radxa_android13/rk/platform/vendor/rockchip/common" path="vendor/rockchip/common" remote="gitlab" revision="390dc01416bf545e0ccc2321bc7e0e5b17fedd07" />
   <project name="rockchip_android14_radxa_rkr6/rk/platform/vendor/rockchip/codec2" path="vendor/rockchip/hardware/interfaces/codec2" remote="gitlab" revision="607f89a1c6786e87e4276e16b94e28fe0bfb797b" />
   <project name="rockchip_android14_radxa_rkr6/rk/hardware/rk29/gatekeeper" path="vendor/rockchip/hardware/interfaces/gatekeeper" remote="gitlab" revision="570069c8e622a818ed7fcc3fa7aade544edee818" />
@@ -1406,4 +1405,7 @@
   <project name="rockchip_android14_radxa_rkr6/rk/hardware/rk29/optee" path="vendor/rockchip/hardware/interfaces/optee" remote="gitlab" revision="53dfbc2a98115171d4f7eda3ddd8319e7f615a8f" />
   <project name="rockchip_android14_radxa_rkr6/rk/platform/vendor/rockchip/rockit" path="vendor/rockchip/hardware/interfaces/rockit" remote="gitlab" revision="879ba298dbd8b53e88e9cfdcc26551e560e65c05" />
   <project name="rockchip_android14_radxa_rkr6/rk/hardware/rk29/weaver" path="vendor/rockchip/hardware/interfaces/weaver" remote="gitlab" revision="9750b829056aa9630ef9da26fc5ccde4ffa60c2c" />
+  <project path="hardware/rockchip/hwcomposer/drmhwc2" name="rockchip_radxa_android13/rk/hardware/rk35/hwcomposer2.git" remote="gitlab" revision="f8586c8a417f67d38513cc04d0ff2c004be37ff8" />
+  <project path="hardware/rockchip/hwcomposer/hwc3" name="rockchip_android14_radxa_rkr6/rk/hardware/rk35/hwcomposer3.git" remote="gitlab" revision="c2ce1c4346ac15c6b2bc7df1a2f868874cf3b75d" />
+  <project path="hardware/rockchip/librga" name="rockchip_android14_radxa_rkr6/linux/linux-rga.git" remote="gitlab" revision="a5444901f6c0164ea1738af16b4991774db95be1" />
 </manifest>

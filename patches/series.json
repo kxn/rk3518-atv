@@ -68,5 +68,32 @@
     "path": "hardware/rockchip/audio",
     "base": "270df335adb8ead55ca3fbb7d7542bc433665439",
     "patch": "patches/hardware__rockchip__audio.patch"
+  },
+  {
+    "path": "packages/modules/Bluetooth",
+    "base": "de2248e503812528d440d0717e76b84148a92e56",
+    "patch": "patches/packages__modules__Bluetooth.patch"
+  },
+  {
+    "path": "src/u-boot",
+    "base": "f182af929fc80d51685b117b3185e6a2e5c17853",
+    "patch": "patches/u-boot.patch",
+    "scope": "workspace"
+  },
+  {
+    "path": "hardware/rockchip/hwcomposer/drmhwc2",
+    "base": "f8586c8a417f67d38513cc04d0ff2c004be37ff8",
+    "patch": "patches/hardware__rockchip__hwcomposer2.patch"
+  },
+  {
+    "path": "hardware/rockchip/librga",
+    "base": "a5444901f6c0164ea1738af16b4991774db95be1",
+    "patch": "patches/hardware__rockchip__librga.patch"
+  },
+  {
+    "path": "src/aic8800",
+    "base": "b8219164aa32842b439ffd6ff4b6cc077af3a837",
+    "patch": "patches/aic-android-hal.patch",
+    "scope": "workspace"
   }
 ]

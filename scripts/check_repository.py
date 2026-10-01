@@ -20,6 +20,7 @@ for entry in json.loads((root/'sources.lock.json').read_text()):
 for entry in json.loads((root/'patches/series.json').read_text()):
     assert (root/entry['patch']).is_file()
     assert re.fullmatch('[0-9a-f]{40}',entry['base'])
+    assert entry.get('scope','aosp') in ('aosp','workspace')
 for entry in json.loads((root/'proprietary-files.json').read_text()):
     assert re.fullmatch('[0-9a-f]{64}',entry['sha256'])
     assert '..' not in Path(entry['workspace_path']).parts
@@ -31,3 +32,19 @@ for f in (root/'scripts').glob('*.py'):
 for f in (root/'scripts').glob('*.sh'):
     subprocess.run(['bash','-n',str(f)],check=True)
 print(f'PASS: {len(projects)} pinned manifest projects; source/patch/input locks and scripts checked')
+
+locks=json.loads((root/'sources.lock.json').read_text())
+assert not any(item.get('history')=='source snapshot' for item in locks)
+for item in locks:
+    if item['path'].startswith('src/aosp/'):
+        path=item['path'][len('src/aosp/'):]
+        project=next(p for p in projects if p.get('path',p.get('name'))==path)
+        assert project.get('revision')==item['revision'],path
+for item in json.loads((root/'source-imports.json').read_text()):
+    for key in ('source','destination'):
+        assert not Path(item[key]).is_absolute() and '..' not in Path(item[key]).parts
+    assert any(item['source'].startswith(p['path']+'/') for p in locks) or item['source'].startswith('src/aosp/device/rockchip/common/')
+for name in ('rk3518-atv-bluetooth','rk3518-atv-u-boot','rk3518-atv-hwcomposer'):
+    assert name not in (root/'default.xml').read_text()
+    assert name not in (root/'sources.lock.json').read_text()
+print('PASS: direct upstream layout; no deprecated snapshot build inputs')

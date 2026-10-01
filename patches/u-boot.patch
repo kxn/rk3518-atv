@@ -1,0 +1,30 @@
+diff --git a/arch/arm/mach-rockchip/boot_rkimg.c b/arch/arm/mach-rockchip/boot_rkimg.c
+index 3e133fb..b875462 100644
+--- a/arch/arm/mach-rockchip/boot_rkimg.c
++++ b/arch/arm/mach-rockchip/boot_rkimg.c
+@@ -349,6 +349,12 @@ void setup_download_mode(void)
+ 		}
+ 	} else if (is_hotkey(HK_FASTBOOT)) {
+ 		env_set("reboot_mode", "fastboot");
++	} else if (IS_ENABLED(CONFIG_ROCKCHIP_RK3528) &&
++		   IS_ENABLED(CONFIG_CMD_ROCKUSB) &&
++		   rockchip_u2phy_vbus_detect() > 0) {
++		/* An A-to-A cable to a PC is an SDP/CDP USB connection. */
++		printf("PC USB connected, entering rockusb download mode...\n");
++		run_command("download", 0);
+ 	}
+ }
+ 
+diff --git a/include/command.h b/include/command.h
+index 681084b..6b2e813 100644
+--- a/include/command.h
++++ b/include/command.h
+@@ -139,7 +139,7 @@ enum command_ret_t {
+  *			number of ticks the command took to complete.
+  * @return 0 if the command succeeded, 1 if it failed
+  */
+-int cmd_process(int flag, int argc, char * const argv[],
++enum command_ret_t cmd_process(int flag, int argc, char * const argv[],
+ 			       int *repeatable, unsigned long *ticks);
+ 
+ void fixup_cmdtable(cmd_tbl_t *cmdtp, int size);

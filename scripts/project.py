@@ -17,13 +17,20 @@ def load(name): return json.loads((HERE/name).read_text())
 def digest(path):
     with path.open('rb') as f: return hashlib.file_digest(f, 'sha256').hexdigest()
 
+def patch_target(work, item):
+    root=work if item.get('scope')=='workspace' else work/'src/aosp'
+    return destination(root,item['path'])
+
+def patch_key(item):
+    return ('workspace:' if item.get('scope')=='workspace' else '')+item['path']
+
 def patch_state(work, item):
-    target=work/'src/aosp'/item['path']
+    target=patch_target(work,item)
     patch=HERE/item['patch']
     records=subprocess.check_output(['git','apply','--numstat','-z',str(patch)],cwd=target).decode().split('\0')
     names={record.split('\t',2)[2] for record in records if record}
     overlay=work/'src/device-support/overlays'/item['path']
-    if overlay.exists():names.update(str(p.relative_to(overlay)) for p in overlay.rglob('*') if p.is_file())
+    if item.get('scope')!='workspace' and overlay.exists():names.update(str(p.relative_to(overlay)) for p in overlay.rglob('*') if p.is_file())
     files={}
     for name in sorted(names):
         file=target/name
@@ -37,12 +44,12 @@ def saved_states(work):
 def applied(work,item,states):
     # Product overlays may extend a patched file beyond the original patch's
     # end-of-file context. Verify their saved content, not only reverse apply.
-    if item['path'] in states:
-        if states[item['path']]!=patch_state(work,item):
+    if patch_key(item) in states:
+        if states[patch_key(item)]!=patch_state(work,item):
             raise RuntimeError('Patched/overlaid files changed since preparation: '+item['path'])
         return True
     return subprocess.run(['git','apply','--reverse','--check',str(HERE/item['patch'])],
-                          cwd=work/'src/aosp'/item['path'],capture_output=True).returncode==0
+                          cwd=patch_target(work,item),capture_output=True).returncode==0
 
 def destination(work, relative):
     result=(work/relative).resolve()
@@ -62,15 +69,39 @@ def fetch_tree(url, revision, path):
     run('git','checkout','--detach',revision,cwd=path)
 
 def native(work):
+    states=saved_states(work)
     for item in load('sources.lock.json'):
         if item['path'].startswith('src/aosp/'): continue
-        fetch_tree(item['url'],item['revision'],destination(work,item['path']))
+        path=destination(work,item['path'])
+        patches=[p for p in load('patches/series.json') if p.get('scope')=='workspace' and p['path']==item['path']]
+        if (path/'.git').exists() and patches and output('git','rev-parse','HEAD',cwd=path)==item['revision'] and all(applied(work,p,states) for p in patches):
+            print('Prepared native source:',item['path']);continue
+        fetch_tree(item['url'],item['revision'],path)
+
+def import_state(work):
+    files={}
+    for item in load('source-imports.json'):
+        target=destination(work/'src/aosp',item['destination'])
+        files[item['destination']]=dict(sha256=digest(target),executable=bool(target.stat().st_mode&0o111)) if target.is_file() else None
+    return dict(mapping_sha256=digest(HERE/'source-imports.json'),files=files)
+
+def import_sources(work,states):
+    if '__imports__' in states and states['__imports__']!=import_state(work):
+        raise RuntimeError('Mapped upstream files changed since preparation')
+    for item in load('source-imports.json'):
+        source=destination(work,item['source'])
+        target=destination(work/'src/aosp',item['destination'])
+        if not source.is_file():raise RuntimeError('Missing mapped source: '+item['source'])
+        target.parent.mkdir(parents=True,exist_ok=True)
+        if target.exists() and target.read_bytes()!=source.read_bytes():
+            raise RuntimeError('Refusing to overwrite different mapped source: '+item['destination'])
+        shutil.copy2(source,target)
 
 def apply(work):
     aosp=work/'src/aosp'
     states=saved_states(work)
     for item in load('patches/series.json'):
-        target=destination(aosp,item['path'])
+        target=patch_target(work,item)
         if output('git','rev-parse','HEAD',cwd=target)!=item['base']:
             raise RuntimeError('Wrong base for '+item['path'])
         patch=HERE/item['patch']
@@ -78,6 +109,7 @@ def apply(work):
             print('Already applied:',item['path']); continue
         run('git','apply','--check',patch,cwd=target)
         run('git','apply',patch,cwd=target)
+    import_sources(work,states)
     dev=work/'src/device-support'
     for source in (dev/'overlays').rglob('*'):
         if not source.is_file():continue
@@ -98,7 +130,8 @@ def apply(work):
     security=aosp/'device/rockchip/common/security'
     for ext in ('pk8','x509.pem'):
         shutil.copy2(aosp/('build/target/product/security/platform.'+ext),security/('nfc.'+ext))
-    states={item['path']:patch_state(work,item) for item in load('patches/series.json')}
+    states={patch_key(item):patch_state(work,item) for item in load('patches/series.json')}
+    states['__imports__']=import_state(work)
     state_file=work/'.rk3518-source-state.json'
     temporary=state_file.with_suffix('.tmp')
     temporary.write_text(json.dumps(states,indent=2)+'\n');temporary.replace(state_file)
@@ -137,8 +170,9 @@ def check(work):
     for name in checks:
         if not (aosp/name).is_file():raise RuntimeError('Missing '+name)
     states=saved_states(work)
+    if states.get('__imports__')!=import_state(work):raise RuntimeError('Mapped source check failed')
     for item in load('patches/series.json'):
-        if output('git','rev-parse','HEAD',cwd=aosp/item['path'])!=item['base'] or not applied(work,item,states):
+        if output('git','rev-parse','HEAD',cwd=patch_target(work,item))!=item['base'] or not applied(work,item,states):
             raise RuntimeError('Patch/base check failed: '+item['path'])
     if not (aosp/'packages/apps/BoxRemoteSetup/Android.bp').exists():raise RuntimeError('Missing remote setup')
     print('Pinned patches, runtime driver files and setup application are present.')

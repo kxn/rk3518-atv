@@ -4,7 +4,7 @@
 目标用途是 AllStream 投屏：保留遥控器、Wi-Fi、视频硬解、HDMI 音频、桌面和 AOSP 屏幕输入法。
 
 本仓库是构建入口，固定 AOSP、Rockchip BSP 和本项目组件的提交，并保存小补丁和构建脚本。
-**源码发布版为 `source-preview-v7.1`。全新检出后的整机编译和冷启动尚未验收，不承诺与现有 v7 镜像逐字节相同。**
+**源码发布版为 `source-preview-v7.2`。全新检出后的整机编译和冷启动尚未验收，不承诺与现有 v7 镜像逐字节相同。**
 已验证的设备和构建范围见 [验证记录](docs/validation.md)。
 
 ## 开始
@@ -30,14 +30,15 @@ export CROSS_COMPILE=/path/to/aarch64-gcc/bin/aarch64-buildroot-linux-gnu-
 
 | 仓库 | 内容 |
 |---|---|
-| [rk3518-atv-device](https://github.com/kxn/rk3518-atv-device) | 独立遥控器配对、产品覆盖、AIC Android HAL、手工引入的图形源码、配置 |
+| [rk3518-atv-device](https://github.com/kxn/rk3518-atv-device) | 本项目的遥控器配对程序、最小产品覆盖和配置 |
 | [rk3518-atv-kernel](https://github.com/kxn/rk3518-atv-kernel) | Rockchip 6.1 内核 fork、Mali DMA_BUF 命名空间适配 |
 | [rk3518-atv-aic8800](https://github.com/kxn/rk3518-atv-aic8800) | AIC SDIO 驱动 fork、稳定 MAC 选择 |
-| [rk3518-atv-u-boot](https://github.com/kxn/rk3518-atv-u-boot) | 64 位 U-Boot、电脑 VBUS 自动下载入口 |
-| [rk3518-atv-hwcomposer](https://github.com/kxn/rk3518-atv-hwcomposer) | HWC2、DRM4 视频格式和同步栅栏修复 |
-| [rk3518-atv-bluetooth](https://github.com/kxn/rk3518-atv-bluetooth) | HID/SMP 重连、L2CAP 生命周期和诊断快照修复 |
+| U-Boot、Bluetooth、HWC2、librga | 直接获取固定上游提交，只在主仓库保存补丁 |
+| HWC3 | 直接获取固定上游提交，无修改 |
+| AIC Android HAL、Soong 插件 | 从固定 SDK/BSP 提取所需文件，应用小补丁；路径见 `source-imports.json` |
 
-内核和 AIC 保留上游 Git 祖先。U-Boot、HWC、Bluetooth 使用注明提交来源的源码快照导入；不是原上游历史的完整镜像。
+内核和 AIC SDIO 是保留完整上游祖先的真实 fork。其余第三方组件直接引用上游，不再使用整仓源码快照导入。
+旧的 Bluetooth/U-Boot/HWC 快照仓库已停用归档，仅保留旧发布的历史记录。
 `sources.lock.json` 和 `default.xml` 固定构建使用的提交；不以变化的上游分支作为构建输入。
 
 ## 配置与边界

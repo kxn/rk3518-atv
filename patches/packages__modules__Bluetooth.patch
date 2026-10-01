@@ -1,0 +1,238 @@
+diff --git a/system/bta/hh/bta_hh_le.cc b/system/bta/hh/bta_hh_le.cc
+index 88f6a2d..044e414 100644
+--- a/system/bta/hh/bta_hh_le.cc
++++ b/system/bta/hh/bta_hh_le.cc
+@@ -1027,11 +1027,13 @@ void bta_hh_security_cmpl(tBTA_HH_DEV_CB* p_cb,
+       bta_hh_le_pri_service_discovery(p_cb);
+     }
+   }
+-  else if(p_cb->btm_status == BTM_ERR_KEY_MISSING) {
+-    log::error("Received encryption failed status:{} btm_status:{}",
+-               bta_hh_status_text(p_cb->status),
+-               btm_status_text(p_cb->btm_status));
+-    bta_hh_le_api_disc_act(p_cb);
++  else if (p_cb->btm_status == BTM_ERR_KEY_MISSING) {
++    // BTM has invalidated the rejected LTK. Keep this GATT client attached
++    // while SMP obtains a new bond instead of closing and reopening it in a
++    // tight loop on the still-live ACL.
++    log::info("Peer key missing; wait for LE re-pairing on existing link");
++    p_cb->state = BTA_HH_W4_SEC;
++    bta_hh_start_security(p_cb, nullptr);
+   } else {
+     log::error("Encryption failed status:{} btm_status:{}",
+                bta_hh_status_text(p_cb->status),
+@@ -1659,7 +1661,16 @@ void bta_hh_le_open_fail(tBTA_HH_DEV_CB* p_cb, const tBTA_HH_DATA* p_data) {
+     bta_hh_clear_service_cache(p_cb);
+   }
+ 
+-  if (p_cb->is_le_device && p_cb->status != BTA_HH_ERR_SDP) {
++  // A local GATT close after a security failure is not a lost radio link.
++  // Re-adding it immediately reconnects to the same ACL and repeatedly starts
++  // SMP. Reconnect automatically only for recoverable remote/link failures.
++  const bool link_failure =
++      le_close->reason == GATT_CONN_FAILED_ESTABLISHMENT ||
++      le_close->reason == GATT_CONN_TERMINATE_PEER_USER ||
++      le_close->reason == GATT_CONN_TIMEOUT;
++  if (p_cb->is_le_device && link_failure &&
++      p_cb->status != BTA_HH_ERR_SDP && p_cb->status != BTA_HH_ERR_SEC &&
++      p_cb->status != BTA_HH_ERR_AUTH_FAILED) {
+     log::debug("gd_acl: Re-adding HID device to acceptlist");
+     // gd removes from bg list after failed connection
+     // Correct the cached state to allow re-add to acceptlist.
+diff --git a/system/bta/test/bta_hh_test.cc b/system/bta/test/bta_hh_test.cc
+index c97cbbb..fbe78ec 100644
+--- a/system/bta/test/bta_hh_test.cc
++++ b/system/bta/test/bta_hh_test.cc
+@@ -106,3 +106,31 @@ TEST_F(BtaHhTest, bta_hh_ctrl_dat_act__BTA_HH_GET_RPT_EVT) {
+   bta_hh_ctrl_dat_act(&cb, &data);
+   ASSERT_EQ(cb.w4_evt, 0);
+ }
++
++// A rejected persisted key must lead to one SMP operation, not a GATT close.
++TEST_F(BtaHhTest, MissingPeerKeyKeepsGattClientForRepair) {
++  tBTA_HH_DEV_CB cb{};
++  cb.is_le_device = true;
++  cb.status = BTA_HH_ERR_SEC;
++  cb.btm_status = BTM_ERR_KEY_MISSING;
++  cb.state = BTA_HH_W4_CONN_ST;
++  bta_hh_security_cmpl(&cb, nullptr);
++  ASSERT_EQ(cb.state, BTA_HH_W4_SEC);
++  ASSERT_EQ(get_func_call_count("BTM_SetEncryption"), 1);
++  ASSERT_EQ(get_func_call_count("BTA_GATTC_Close"), 0);
++}
++
++TEST_F(BtaHhTest, LocalSecurityFailureDoesNotRequeueGattOpen) {
++  tBTA_HH_DEV_CB cb{};
++  cb.is_le_device = true;
++  cb.status = BTA_HH_ERR_SEC;
++  tBTA_HH_DATA data{};
++  data.le_close.reason = GATT_CONN_TERMINATE_LOCAL_HOST;
++  // The callback is still delivered so the owner can schedule bounded recovery.
++  bta_hh_cb.p_cback = [](tBTA_HH_EVT event, tBTA_HH*) {
++    ASSERT_EQ(event, BTA_HH_OPEN_EVT);
++  };
++  bta_hh_le_open_fail(&cb, &data);
++  ASSERT_EQ(get_func_call_count("BTA_GATTC_Open"), 0);
++  ASSERT_EQ(get_func_call_count("BTA_GATTC_OpenWithRemoteAddressType"), 0);
++}
+diff --git a/system/btif/src/bluetooth.cc b/system/btif/src/bluetooth.cc
+index 1bdc3de..e8fc79f 100644
+--- a/system/btif/src/bluetooth.cc
++++ b/system/btif/src/bluetooth.cc
+@@ -50,6 +50,11 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <sys/mman.h>
++#include <errno.h>
++#include <future>
++#include <chrono>
++#include <memory>
+ 
+ #include "audio_hal_interface/a2dp_encoding.h"
+ #include "bta/hh/bta_hh_int.h"  // for HID HACK profile methods
+@@ -806,6 +811,19 @@ static int set_event_filter_connection_setup_all_devices() {
+   return BT_STATUS_SUCCESS;
+ }
+ 
++struct ConnectionDump {
++  explicit ConnectionDump(int descriptor) : fd(descriptor) {}
++  ~ConnectionDump() { close(fd); }
++  const int fd;
++  std::promise<void> completed;
++};
++
++static void dump_connections_on_main(std::shared_ptr<ConnectionDump> snapshot) {
++  // Never write a potentially blocked dumpsys pipe on the Bluetooth main thread.
++  connection_manager::dump(snapshot->fd);
++  snapshot->completed.set_value();
++}
++
+ static void dump(int fd, const char** arguments) {
+   btif_debug_conn_dump(fd);
+   btif_debug_bond_event_dump(fd);
+@@ -829,7 +847,35 @@ static void dump(int fd, const char** arguments) {
+   LeAudioClient::DebugDump(fd);
+   LeAudioBroadcaster::DebugDump(fd);
+   VolumeControl::DebugDump(fd);
+-  connection_manager::dump(fd);
++  const int connection_fd = memfd_create("bt-connection-dump", MFD_CLOEXEC);
++  if (connection_fd >= 0) {
++    auto snapshot = std::make_shared<ConnectionDump>(connection_fd);
++    auto result = snapshot->completed.get_future();
++    bool posted = true;
++    if (get_main_thread()->GetThreadId() == base::PlatformThread::CurrentId()) {
++      dump_connections_on_main(snapshot);
++    } else {
++      posted = do_in_main_thread(FROM_HERE,
++          base::BindOnce(dump_connections_on_main, snapshot)) == BT_STATUS_SUCCESS;
++    }
++    if (posted && result.wait_for(std::chrono::seconds(2)) == std::future_status::ready &&
++        lseek(connection_fd, 0, SEEK_SET) >= 0) {
++      char buffer[4096];
++      ssize_t count;
++      while ((count = TEMP_FAILURE_RETRY(read(connection_fd, buffer, sizeof(buffer)))) > 0) {
++        ssize_t offset = 0;
++        while (offset < count) {
++          ssize_t written = TEMP_FAILURE_RETRY(write(fd, buffer + offset, count - offset));
++          if (written <= 0) break;
++          offset += written;
++        }
++        if (offset < count) break;
++      }
++    } else {
++      dprintf(fd, "Connection snapshot unavailable (Bluetooth main thread busy).\n");
++    }
++    // A queued callback owns its snapshot even if the caller timed out.
++  }
+   bluetooth::bqr::DebugDump(fd);
+   PAN_Dumpsys(fd);
+   DumpsysHid(fd);
+diff --git a/system/btif/src/btif_dm.cc b/system/btif/src/btif_dm.cc
+index c7f33ae..b004c95 100644
+--- a/system/btif/src/btif_dm.cc
++++ b/system/btif/src/btif_dm.cc
+@@ -2879,6 +2879,13 @@ void btif_dm_cancel_bond(const RawAddress bd_addr) {
+ void btif_dm_hh_open_failed(RawAddress* bdaddr) {
+   if (pairing_cb.state == BT_BOND_STATE_BONDING &&
+       *bdaddr == pairing_cb.bd_addr) {
++    // An LE HID GATT client can close while SMP repairs a missing peer key.
++    // Only SMP completion may terminate that bond; a profile-open failure is
++    // not a pairing failure and can otherwise invalidate pending consent.
++    if (pairing_cb.is_le_only) {
++      log::info("Keep LE pairing active after HID open failure");
++      return;
++    }
+     bond_state_changed(BT_STATUS_RMT_DEV_DOWN, *bdaddr, BT_BOND_STATE_NONE);
+   }
+ }
+diff --git a/system/stack/l2cap/l2c_api.cc b/system/stack/l2cap/l2c_api.cc
+index 83d9b93..cf5c7b5 100644
+--- a/system/stack/l2cap/l2c_api.cc
++++ b/system/stack/l2cap/l2c_api.cc
+@@ -1358,6 +1358,12 @@ uint16_t L2CA_SendFixedChnlData(uint16_t fixed_cid, const RawAddress& rem_bda,
+                         p_buf);
+ 
+   l2c_link_check_send_pkts(p_lcb, 0, NULL);
++  // Sending can synchronously release this link and its fixed channel.
++  if (!p_lcb->in_use ||
++      p_lcb->p_fixed_ccbs[fixed_cid - L2CAP_FIRST_FIXED_CHNL] == nullptr) {
++    return L2CAP_DW_FAILED;
++  }
++
+ 
+   // If there is no dynamic CCB on the link, restart the idle timer each time
+   // something is sent
+diff --git a/system/stack/l2cap/l2c_link.cc b/system/stack/l2cap/l2c_link.cc
+index 9279a66..693eacb 100644
+--- a/system/stack/l2cap/l2c_link.cc
++++ b/system/stack/l2cap/l2c_link.cc
+@@ -803,6 +803,11 @@ static bool l2c_link_check_power_mode(tL2C_LCB* p_lcb) {
+  ******************************************************************************/
+ void l2c_link_check_send_pkts(tL2C_LCB* p_lcb, uint16_t local_cid,
+                               BT_HDR* p_buf) {
++  if (p_lcb != nullptr && (!p_lcb->in_use || p_lcb->link_xmit_data_q == nullptr)) {
++    if (p_buf != nullptr) osi_free(p_buf);
++    return;
++  }
++
+   bool single_write = false;
+ 
+   /* Save the channel ID for faster counting */
+@@ -920,6 +925,7 @@ void l2c_link_check_send_pkts(tL2C_LCB* p_lcb, uint16_t local_cid,
+             (l2cb.controller_le_xmit_window != 0 &&
+              (p_lcb->transport == BT_TRANSPORT_LE))) &&
+            (p_lcb->sent_not_acked < p_lcb->link_xmit_quota)) {
++      if (!p_lcb->in_use || p_lcb->link_xmit_data_q == nullptr) return;
+       if (list_is_empty(p_lcb->link_xmit_data_q)) {
+         log::verbose("No transmit data, skipping");
+         break;
+@@ -946,9 +952,12 @@ void l2c_link_check_send_pkts(tL2C_LCB* p_lcb, uint16_t local_cid,
+         }
+         log::verbose("Sending to lower layer");
+         l2c_link_send_to_lower(p_lcb, p_buf, &cbi);
++        if (!p_lcb->in_use || p_lcb->link_xmit_data_q == nullptr) return;
+       }
+     }
+ 
++    if (!p_lcb->in_use || p_lcb->link_xmit_data_q == nullptr) return;
++
+     /* There is a special case where we have readjusted the link quotas and  */
+     /* this link may have sent anything but some other link sent packets so  */
+     /* so we may need a timer to kick off this link's transmissions.         */
+diff --git a/system/stack/test/stack_l2cap_test.cc b/system/stack/test/stack_l2cap_test.cc
+index 6e3b013..12e80f4 100644
+--- a/system/stack/test/stack_l2cap_test.cc
++++ b/system/stack/test/stack_l2cap_test.cc
+@@ -246,3 +246,11 @@ TEST_F(StackL2capTest, l2cap_result_code_text) {
+           static_cast<tL2CAP_CONN>(std::numeric_limits<std::uint16_t>::max()))
+           .c_str());
+ }
++
++TEST_F(StackL2capTest, transmit_after_acl_release_drops_owned_buffer) {
++  tL2C_LCB released = {};
++  auto* packet = static_cast<BT_HDR*>(osi_calloc(sizeof(BT_HDR)));
++  l2c_link_check_send_pkts(&released, L2CAP_SMP_CID, packet);
++  EXPECT_FALSE(released.in_use);
++  EXPECT_EQ(nullptr, released.link_xmit_data_q);
++}

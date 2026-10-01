@@ -1,0 +1,386 @@
+[
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/Android.mk",
+    "destination": "hardware/aic/aicbt/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/aicbt.mk",
+    "destination": "hardware/aic/aicbt/aicbt.mk"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/Android.mk",
+    "destination": "hardware/aic/aicbt/libbt/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/OWNERS",
+    "destination": "hardware/aic/aicbt/libbt/OWNERS"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/plc/lowcfe_v3.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/plc/lowcfe_v3.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/plc/lowcfe_v3.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/plc/lowcfe_v3.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/plc/sbcplc.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/plc/sbcplc.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/plc/sbcplc.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/plc/sbcplc.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/formats.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/formats.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_math.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_math.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_armv6.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_armv6.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_armv6.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_armv6.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_iwmmxt.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_iwmmxt.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_iwmmxt.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_iwmmxt.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_mmx.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_mmx.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_mmx.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_mmx.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_neon.c",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_neon.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_primitives_neon.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_primitives_neon.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_private.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_private.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/codec/sbc/sbc_tables.h",
+    "destination": "hardware/aic/aicbt/libbt/codec/sbc/sbc_tables.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/gen-buildcfg.sh",
+    "destination": "hardware/aic/aicbt/libbt/gen-buildcfg.sh"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_btservice.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_btservice.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_btsnoop_net.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_btsnoop_net.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_common.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_common.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_hcidefs.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_hcidefs.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_parse.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_parse.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_poll.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_poll.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/aic_socket.h",
+    "destination": "hardware/aic/aicbt/libbt/include/aic_socket.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/bt_list.h",
+    "destination": "hardware/aic/aicbt/libbt/include/bt_list.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/bt_skbuff.h",
+    "destination": "hardware/aic/aicbt/libbt/include/bt_skbuff.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/bt_vendor_aic.h",
+    "destination": "hardware/aic/aicbt/libbt/include/bt_vendor_aic.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/hardware.h",
+    "destination": "hardware/aic/aicbt/libbt/include/hardware.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/hci_h5_int.h",
+    "destination": "hardware/aic/aicbt/libbt/include/hci_h5_int.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/upio.h",
+    "destination": "hardware/aic/aicbt/libbt/include/upio.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/userial_vendor.h",
+    "destination": "hardware/aic/aicbt/libbt/include/userial_vendor.h"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/include/vnd_generic.txt",
+    "destination": "hardware/aic/aicbt/libbt/include/vnd_generic.txt"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_btservice.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_btservice.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_btsnoop_net.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_btsnoop_net.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_heartbeat.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_heartbeat.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_parse.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_parse.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_poll.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_poll.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/aic_socket.c",
+    "destination": "hardware/aic/aicbt/libbt/src/aic_socket.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/bt_list.c",
+    "destination": "hardware/aic/aicbt/libbt/src/bt_list.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/bt_skbuff.c",
+    "destination": "hardware/aic/aicbt/libbt/src/bt_skbuff.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/bt_vendor_aic.c",
+    "destination": "hardware/aic/aicbt/libbt/src/bt_vendor_aic.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/hardware.c",
+    "destination": "hardware/aic/aicbt/libbt/src/hardware.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/hardware_uart.c",
+    "destination": "hardware/aic/aicbt/libbt/src/hardware_uart.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/hardware_usb.c",
+    "destination": "hardware/aic/aicbt/libbt/src/hardware_usb.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/hci_h5.c",
+    "destination": "hardware/aic/aicbt/libbt/src/hci_h5.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/upio.c",
+    "destination": "hardware/aic/aicbt/libbt/src/upio.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/userial_vendor.c",
+    "destination": "hardware/aic/aicbt/libbt/src/userial_vendor.c"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/src/userial_vendor.c.bak",
+    "destination": "hardware/aic/aicbt/libbt/src/userial_vendor.c.bak"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/libbt/vnd_buildcfg.mk",
+    "destination": "hardware/aic/aicbt/libbt/vnd_buildcfg.mk"
+  },
+  {
+    "source": "src/aic8800/src/libbt-vendor/aicbt/vendor/etc/bluetooth/aicbt.conf",
+    "destination": "hardware/aic/aicbt/vendor/etc/bluetooth/aicbt.conf"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/Android.mk",
+    "destination": "hardware/aic/wlan/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/config/Android.mk",
+    "destination": "hardware/aic/wlan/config/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/config/config.mk",
+    "destination": "hardware/aic/wlan/config/config.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/config/p2p_supplicant_overlay.conf",
+    "destination": "hardware/aic/wlan/config/p2p_supplicant_overlay.conf"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/config/wpa_supplicant_overlay.conf",
+    "destination": "hardware/aic/wlan/config/wpa_supplicant_overlay.conf"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/Android.mk",
+    "destination": "hardware/aic/wlan/driver_cmd/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/driver_cmd_nl80211.c",
+    "destination": "hardware/aic/wlan/driver_cmd/driver_cmd_nl80211.c"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/Android.mk",
+    "destination": "hardware/aic/wlan/wifi_hal/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/common.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/common.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/common.h",
+    "destination": "hardware/aic/wlan/wifi_hal/common.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/cpp_bindings.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/cpp_bindings.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/cpp_bindings.h",
+    "destination": "hardware/aic/wlan/wifi_hal/cpp_bindings.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/gscan.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/gscan.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/link_layer_stats.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/link_layer_stats.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/rtt.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/rtt.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/sync.h",
+    "destination": "hardware/aic/wlan/wifi_hal/sync.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/wifi_hal.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/wifi_hal.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/wifi_logger.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/wifi_logger.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal/wifi_offload.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal/wifi_offload.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.bp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/Android.bp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/Android.mk",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/Android.mk"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/common.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/common.h",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/common.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/cpp_bindings.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/cpp_bindings.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/cpp_bindings.h",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/cpp_bindings.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/gscan.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/gscan.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/link_layer_stats.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/link_layer_stats.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/rtt.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/rtt.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/sync.h",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/sync.h"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/wifi_hal.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/wifi_logger.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp",
+    "destination": "hardware/aic/wlan/wifi_hal_for_android13/wifi_offload.cpp"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/NOTICE",
+    "destination": "hardware/aic/wlan/driver_cmd/NOTICE"
+  },
+  {
+    "source": "src/aic8800/src/SDIO/driver_fw/aic/wlan/wpa_supplicant_8_lib/MODULE_LICENSE_BSD",
+    "destination": "hardware/aic/wlan/driver_cmd/MODULE_LICENSE_BSD"
+  },
+  {
+    "source": "src/aosp/device/rockchip/common/scripts/soong_rockchip_prebuilt/Android.bp.migrated",
+    "destination": "hardware/rockchip/soong_rockchip_prebuilt/Android.bp"
+  },
+  {
+    "source": "src/aosp/device/rockchip/common/scripts/soong_rockchip_prebuilt/README.md",
+    "destination": "hardware/rockchip/soong_rockchip_prebuilt/README.md"
+  },
+  {
+    "source": "src/aosp/device/rockchip/common/scripts/soong_rockchip_prebuilt/prebuilt_lib.go",
+    "destination": "hardware/rockchip/soong_rockchip_prebuilt/prebuilt_lib.go"
+  },
+  {
+    "source": "src/aosp/device/rockchip/common/scripts/soong_rockchip_prebuilt/prebuilt_obj.go",
+    "destination": "hardware/rockchip/soong_rockchip_prebuilt/prebuilt_obj.go"
+  }
+]

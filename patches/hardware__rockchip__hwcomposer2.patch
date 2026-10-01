@@ -1,0 +1,442 @@
+diff --git a/Android.bp b/Android.bp
+new file mode 100644
+index 0000000..a7ee215
+--- /dev/null
++++ b/Android.bp
+@@ -0,0 +1,9 @@
++cc_binary {
++    name: "rk_hwc_sync_audit",
++    vendor: true,
++    compile_multilib: "64",
++    srcs: ["audit-tests/sync_audit.cpp", "rockchip/common/drmfence.cpp"],
++    local_include_dirs: ["include"],
++    shared_libs: ["libutils", "libsync", "liblog", "libcutils"],
++    cflags: ["-Wall", "-Werror", "-fno-access-control"],
++}
+diff --git a/Android.mk b/Android.mk
+index 1bcf66e..c128e4e 100755
+--- a/Android.mk
++++ b/Android.mk
+@@ -52,6 +52,7 @@ ifeq ($(strip $(BOARD_USES_DRM_HWCOMPOSER2)),true)
+ 
+ include $(CLEAR_VARS)
+ 
++LOCAL_MULTILIB := 64
+ LOCAL_SHARED_LIBRARIES := \
+   libcutils \
+   libdrm \
+@@ -59,7 +60,7 @@ LOCAL_SHARED_LIBRARIES := \
+   liblog \
+   libui \
+   libutils \
+-  libsync_vendor \
++  libsync \
+   libtinyxml2 \
+   libbaseparameter \
+   librga
+@@ -75,6 +76,7 @@ LOCAL_C_INCLUDES := \
+   system/core/libsync/include \
+   external/tinyxml2 \
+   hardware/rockchip/libbaseparameter \
++  hardware/rockchip/libgralloc \
+   hardware/rockchip/librga/include \
+   hardware/rockchip/librga/im2d_api
+ 
+@@ -337,7 +339,7 @@ LOCAL_MODULE_SUFFIX := .so
+ LOCAL_VENDOR_MODULE := true
+ LOCAL_PROPRIETARY_MODULE := true
+ ifneq ($(strip $(TARGET_2ND_ARCH)), )
+-LOCAL_MULTILIB := both
++LOCAL_MULTILIB := 64
+ LOCAL_SRC_FILES_$(TARGET_ARCH) := $(TARGET_VIVID_HDR_PARSER_LIB_PATH)/$(TARGET_ARCH)/libhdr_params_parser.so
+ LOCAL_SRC_FILES_$(TARGET_2ND_ARCH) := $(TARGET_VIVID_HDR_PARSER_LIB_PATH)/$(TARGET_2ND_ARCH)/libhdr_params_parser.so
+ else
+diff --git a/audit-tests/sync_audit.cpp b/audit-tests/sync_audit.cpp
+new file mode 100644
+index 0000000..77ffcca
+--- /dev/null
++++ b/audit-tests/sync_audit.cpp
+@@ -0,0 +1,26 @@
++#include "utils/drmfence.h"
++#include <dirent.h>
++#include <assert.h>
++#include <errno.h>
++#include <stdio.h>
++#include <string.h>
++using namespace android;
++static int fd_count(){DIR* d=opendir("/proc/self/fd");assert(d);int n=0;while(readdir(d))++n;closedir(d);return n;}
++int main(){
++ int start=fd_count();
++ {SyncTimeline t;t.iTimelineCnt_=UINT32_MAX-1;assert(t.IncTimeline()==UINT32_MAX);assert(t.IncTimeline()==0);}
++ for(int i=0;i<500;++i){
++  SyncTimeline t;assert(t.isValid());assert(fcntl(t.getFd(),F_GETFD)&FD_CLOEXEC);
++  sp<ReleaseFence> f=new ReleaseFence(t,1);
++  assert(f->isValid());assert(f->getName().find("allocReleaseFence")==0);
++  assert(fcntl(f->getFd(),F_GETFD)&FD_CLOEXEC);
++  assert(f->wait(0)<0);assert(errno==ETIME);
++  assert(f->signal()==0);assert(f->wait(100)==0);
++  int owned=f->getFd();f.clear();assert(fcntl(owned,F_GETFD)<0&&errno==EBADF);
++ }
++ {SyncTimeline t;t.destroy();sp<ReleaseFence> f=new ReleaseFence(t,1);assert(!f->isValid());}
++ {SyncTimeline t;char name[128];memset(name,'a',127);name[127]=0;sp<ReleaseFence> f=new ReleaseFence(t,1,name);assert(f->isValid());assert(f->signal()==0);assert(f->wait(100)==0);}
++ assert(fd_count()==start);
++ printf("PASS: 500 real timelines/fences, null/long names, CLOEXEC, timeout/signal, invalid timeline, uint32 wrap, no FD leak\n");
++ return 0;
++}
+diff --git a/drmhwctwo.cpp b/drmhwctwo.cpp
+index 633882a..a204678 100755
+--- a/drmhwctwo.cpp
++++ b/drmhwctwo.cpp
+@@ -67,7 +67,7 @@ static inline long __currentTime(){
+       String8 output; \
+       for(auto &drmHwcLayer : drmHwcLayers) {\
+         drmHwcLayer.DumpInfo(output); \
+-        ALOGD_IF(LogLevel(log_level),"%s",output.string()); \
++        ALOGD_IF(LogLevel(log_level),"%s",output.c_str()); \
+         output.clear(); \
+       }\
+     }
+@@ -248,7 +248,7 @@ void DrmHwcTwo::Dump(uint32_t *size, char *buffer) {
+     if((map_disp.second.DumpDisplayInfo(output)) < 0)
+       continue;
+   }
+-  mDumpString = output.string();
++  mDumpString = output.c_str();
+   *size = static_cast<uint32_t>(mDumpString.size());
+   return;
+ }
+@@ -1274,7 +1274,7 @@ void DrmHwcTwo::HwcDisplay::AddFenceToRetireFence(int fd) {
+     const sp<ReleaseFence> client_rf = client_layer_.back_release_fence();
+     if(client_rf->isValid()){
+       retire_fence_fd = dup(client_rf->getFd());
+-      sprintf(acBuf,"RTD%" PRIu64 "-FN%d-%d", handle_, frame_no_, 0);
++      snprintf(acBuf, sizeof(acBuf),"RTD%" PRIu64 "-FN%d-%d", handle_, frame_no_, 0);
+     }
+     for (std::pair<const hwc2_layer_t, DrmHwcTwo::HwcLayer> &hwc2layer : layers_) {
+     if(hwc2layer.second.validated_type() != HWC2::Composition::Device)
+@@ -1285,7 +1285,7 @@ void DrmHwcTwo::HwcDisplay::AddFenceToRetireFence(int fd) {
+       if (rf->isValid()){
+         // cur_retire_fence is null
+         if(retire_fence_fd > 0){
+-          sprintf(acBuf,"RTD%" PRIu64 "-FN%d-%" PRIu64,handle_, frame_no_, hwc2layer.first);
++          snprintf(acBuf, sizeof(acBuf),"RTD%" PRIu64 "-FN%d-%" PRIu64,handle_, frame_no_, hwc2layer.first);
+           int retire_fence_merge = rf->merge(retire_fence_fd, acBuf);
+           if(retire_fence_merge > 0){
+             close(retire_fence_fd);
+@@ -1914,7 +1914,7 @@ HWC2::Error DrmHwcTwo::HwcDisplay::PresentDisplay(int32_t *retire_fence) {
+   if(merge_retire_fence > 0){
+     if(d_retire_fence_.get()->isValid()){
+       char acBuf[32];
+-      sprintf(acBuf,"RTD%" PRIu64 "M-FN%d-%d", handle_, frame_no_, 0);
++      snprintf(acBuf, sizeof(acBuf),"RTD%" PRIu64 "M-FN%d-%d", handle_, frame_no_, 0);
+       sp<ReleaseFence> rt = sp<ReleaseFence>(new ReleaseFence(merge_retire_fence, acBuf));
+       *retire_fence = rt->merge(d_retire_fence_.get()->getFd(), acBuf);
+     }else{
+@@ -2575,21 +2575,21 @@ int DrmHwcTwo::HwcDisplay::DumpDisplayLayersInfo(){
+               "------+-----+-----------+-----------+--------------------+-------------+------------+--------------------------------+------------------------+------------+--------+------------\n"
+               "  id  |  z  |  sf-type  |  hwc-type |       handle       |  transform  |    blnd    |     source crop (l,t,r,b)      |          frame         | dataspace  |  mFps  | name       \n"
+               "------+-----+-----------+-----------+--------------------+-------------+------------+--------------------------------+------------------------+------------+--------+------------\n");
+-  ALOGD("%s",output.string());
++  ALOGD("%s",output.c_str());
+   for (uint32_t z_order = 0; z_order <= layers_.size(); z_order++) {
+     for (auto &map_layer : layers_) {
+       HwcLayer &layer = map_layer.second;
+       if(layer.z_order() == z_order){
+         output.clear();
+         layer.DumpLayerInfo(output);
+-        ALOGD("%s",output.string());
++        ALOGD("%s",output.c_str());
+         break;
+       }
+     }
+   }
+   output.clear();
+   output.append("------+-----+-----------+-----------+--------------------+-------------+------------+--------------------------------+------------------------+------------+--------+------------\n");
+-  ALOGD("%s",output.string());
++  ALOGD("%s",output.c_str());
+   return 0;
+ }
+ int DrmHwcTwo::HwcDisplay::DumpAllLayerData(){
+@@ -3384,10 +3384,10 @@ int DrmHwcTwo::HwcDisplay::DoMirrorDisplay(int32_t *retire_fence){
+         display.PresentDisplay(&rt_fence);
+         if(merge_rt_fence > 0){
+             char acBuf[32];
+-            sprintf(acBuf,"RTD%" PRIu64 "M-FN%d-%d", handle_, frame_no_, display_cnt++);
++            snprintf(acBuf, sizeof(acBuf),"RTD%" PRIu64 "M-FN%d-%d", handle_, frame_no_, display_cnt++);
+             sp<ReleaseFence> rt = sp<ReleaseFence>(new ReleaseFence(rt_fence, acBuf));
+             if(rt->isValid()){
+-              sprintf(acBuf,"RTD%" PRIu64 "M-FN%d-%d",handle_, frame_no_, display_cnt++);
++              snprintf(acBuf, sizeof(acBuf),"RTD%" PRIu64 "M-FN%d-%d",handle_, frame_no_, display_cnt++);
+               int32_t merge_rt_fence_temp = merge_rt_fence;
+               merge_rt_fence = rt->merge(merge_rt_fence, acBuf);
+               close(merge_rt_fence_temp);
+diff --git a/include/libsync/sw_sync.h b/include/libsync/sw_sync.h
+new file mode 100644
+index 0000000..ba6da6d
+--- /dev/null
++++ b/include/libsync/sw_sync.h
+@@ -0,0 +1,57 @@
++/* Minimal sw_sync userspace shim for RK BSP kernels (CONFIG_SW_SYNC=y).
++ * This vendor build cannot use the legacy exported libsync/sw_sync.h API.
++ * Match the RK kernel UAPI; do not depend on debugfs permissions. */
++#ifndef RK_SW_SYNC_H
++#define RK_SW_SYNC_H
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++#include <stddef.h>
++#include <sys/ioctl.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <string.h>
++#include <stdint.h>
++
++#define SW_SYNC_IOC_MAGIC 'W'
++
++struct sw_sync_create_fence_data {
++	__u32	value;
++	char	name[32];
++	__s32	fence;
++};
++
++static_assert(sizeof(sw_sync_create_fence_data) == 40, "sw_sync ioctl size");
++static_assert(offsetof(sw_sync_create_fence_data, fence) == 36, "sw_sync fence offset");
++
++/* bionic does not expose _IOWR via linux/ioctl.h; encode the ioctl number
++ * directly (dir<<30 | size<<16 | type<<8 | nr). struct size = 40 bytes. */
++#define SW_SYNC_IOC_CREATE_FENCE	((3u << 30) | (40u << 16) | ('W' << 8) | 0)
++#define SW_SYNC_IOC_INC			((1u << 30) | (4u << 16) | ('W' << 8) | 1)
++
++static inline int sw_sync_timeline_create(void)
++{
++	/* Prefer the device node: debugfs can be root-only on production images. */
++	int fd = open("/dev/sw_sync", O_RDWR | O_CLOEXEC);
++	if (fd < 0)
++		fd = open("/sys/kernel/debug/sync/sw_sync", O_RDWR | O_CLOEXEC);
++	return fd;
++}
++
++static inline int sw_sync_fence_create(int fd, const char *name, unsigned int value)
++{
++	struct sw_sync_create_fence_data data = {};
++	int err;
++	data.value = value;
++	strncpy(data.name, name ? name : "rkfence", sizeof(data.name) - 1);
++	data.name[sizeof(data.name) - 1] = 0;
++	err = ioctl(fd, SW_SYNC_IOC_CREATE_FENCE, &data);
++	return err < 0 ? err : data.fence;
++}
++
++static inline int sw_sync_timeline_inc(int fd, unsigned int count)
++{
++	return ioctl(fd, SW_SYNC_IOC_INC, &count);
++}
++
++#endif
+diff --git a/include/utils/drmfence.h b/include/utils/drmfence.h
+index 73a0820..775ff8e 100644
+--- a/include/utils/drmfence.h
++++ b/include/utils/drmfence.h
+@@ -37,11 +37,11 @@ public:
+     void destroy();
+     bool isValid() const;
+     int getFd() const;
+-    int IncTimeline();
++    uint32_t IncTimeline();
+ private:
+     int iFd_ = -1;
+     bool bFdInitialized_ = false;
+-    int iTimelineCnt_ = 0;
++    uint32_t iTimelineCnt_ = 0;
+ };
+ 
+ struct SyncPointInfo {
+@@ -51,7 +51,6 @@ struct SyncPointInfo {
+     int status; // 1 sig, 0 active, neg is err
+ };
+ 
+-static int s_fenceCount = 0;
+ 
+ // Wrapper class for sync fence.
+ class ReleaseFence : public LightRefBase<ReleaseFence> {
+diff --git a/rockchip/common/drmbaseparameter.cpp b/rockchip/common/drmbaseparameter.cpp
+index a7d055f..104e0d3 100644
+--- a/rockchip/common/drmbaseparameter.cpp
++++ b/rockchip/common/drmbaseparameter.cpp
+@@ -137,7 +137,7 @@ int DrmBaseparameter::UpdateConnectorBaseInfo(unsigned int connector_type,
+   output.appendFormat("     GAMMA: Size=%d\n",info->gamma_lut_data.size);
+   output.appendFormat("     3DLUT: Size=%d\n",info->cubic_lut_data.size);
+ 
+-  ALOGI("%s",output.string());
++  ALOGI("%s",output.c_str());
+   return 0;
+ }
+ 
+@@ -181,7 +181,7 @@ int DrmBaseparameter::DumpConnectorBaseInfo(unsigned int connector_type,
+   output.appendFormat("     GAMMA: Size=%d\n",info->gamma_lut_data.size);
+   output.appendFormat("     3DLUT: Size=%d\n",info->cubic_lut_data.size);
+ 
+-  ALOGI("%s",output.string());
++  ALOGI("%s",output.c_str());
+   return 0;
+ }
+ 
+@@ -215,7 +215,7 @@ int DrmBaseparameter::SetScreenInfo(unsigned int connector_type,
+                       info[index].resolution.vsync_start,info[index].resolution.vsync_end,
+                       info[index].resolution.vtotal,info[index].resolution.flags,
+                       info[index].resolution.clock);
+-  ALOGI("%s",output.string());
++  ALOGI("%s",output.c_str());
+   return ret;
+ }
+ }
+diff --git a/rockchip/common/drmfence.cpp b/rockchip/common/drmfence.cpp
+index 7ee02a9..b1fe85d 100644
+--- a/rockchip/common/drmfence.cpp
++++ b/rockchip/common/drmfence.cpp
+@@ -15,17 +15,22 @@
+  */
+ 
+ #include "utils/drmfence.h"
++#include <atomic>
+ 
+ namespace android {
+ 
++static std::atomic<uint32_t> s_fenceCount{0};
++
+ const sp<ReleaseFence> ReleaseFence::NO_FENCE = sp<ReleaseFence>(new ReleaseFence);
+ const sp<AcquireFence> AcquireFence::NO_FENCE = sp<AcquireFence>(new AcquireFence);
+ 
+ // SyncTimeline:
+ SyncTimeline::SyncTimeline() noexcept {
+     int fd = sw_sync_timeline_create();
+-    if (fd == -1)
++    if (fd < 0) {
++        ALOGE("Cannot create sw_sync timeline: %s", strerror(errno));
+         return;
++    }
+     bFdInitialized_ = true;
+     iFd_ = fd;
+ }
+@@ -54,7 +59,7 @@ bool SyncTimeline::isValid() const {
+ int SyncTimeline::getFd() const {
+     return iFd_;
+ }
+-int SyncTimeline::IncTimeline() {
++uint32_t SyncTimeline::IncTimeline() {
+     return ++iTimelineCnt_;
+ }
+ 
+@@ -75,20 +80,18 @@ ReleaseFence::ReleaseFence(const SyncTimeline &timeline,
+           int value,
+           const char *name) noexcept {
+     std::string autoName = "allocReleaseFence";
+-    autoName += s_fenceCount;
+-    s_fenceCount++;
++    autoName += std::to_string(s_fenceCount.fetch_add(1, std::memory_order_relaxed));
+     int fd = sw_sync_fence_create(timeline.getFd(), name ? name : autoName.c_str(), value);
+     if (fd == -1)
+         return;
+-    setFd(fd, timeline.getFd(), name);
++    setFd(fd, timeline.getFd(), name ? name : autoName);
+ 
+ }
+ 
+ int ReleaseFence::merge(int fd, const char* name){
+     if(isValid()){
+       std::string autoName = "mergeReleaseFence";
+-      autoName += s_fenceCount;
+-      s_fenceCount++;
++      autoName += std::to_string(s_fenceCount.fetch_add(1, std::memory_order_relaxed));
+       return sync_merge(name ? name : autoName.c_str(), getFd(), fd);
+     }
+     return -1;
+@@ -199,8 +202,7 @@ AcquireFence::AcquireFence(const int fd) noexcept {
+ int AcquireFence::merge(int fd, const char* name){
+     if(isValid()){
+       std::string autoName = "mergeAcquireFence";
+-      autoName += s_fenceCount;
+-      s_fenceCount++;
++      autoName += std::to_string(s_fenceCount.fetch_add(1, std::memory_order_relaxed));
+       return sync_merge(name ? name : autoName.c_str(), getFd(), fd);
+     }
+     return -1;
+diff --git a/rockchip/common/drmgralloc.cpp b/rockchip/common/drmgralloc.cpp
+index debef8b..0214690 100755
+--- a/rockchip/common/drmgralloc.cpp
++++ b/rockchip/common/drmgralloc.cpp
+@@ -769,9 +769,9 @@ uint32_t DrmGralloc::hwc_get_fourcc_from_hal_format(int hal_format){
+       return DRM_FORMAT_NV12;
+     case HAL_PIXEL_FORMAT_YCrCb_NV12_10:
+       // DrmVersion:
+-      // 3.0.0 = Kernel 5.10
++      // DRM major 3 (kernel 5.10) and 4 (kernel 6.1) use upstream FourCCs.
+       // 2.0.0 = Kernel 4.19 Vop driver 不支持 NV15格式
+-      if(drmVersion_ == 3){
++      if(drmVersion_ >= 3){
+         return DRM_FORMAT_NV15;
+       }else{
+         return DRM_FORMAT_NV12_10;
+@@ -779,18 +779,18 @@ uint32_t DrmGralloc::hwc_get_fourcc_from_hal_format(int hal_format){
+     // From hardware/rockchip/libgralloc/gralloc_drm_rockchip.cpp rk_drm_gralloc_select_format()
+     case HAL_PIXEL_FORMAT_YUV420_8BIT_I:  // NV12 AFBC,  MALI_GRALLOC_FORMAT_INTERNAL_YUV420_8BIT_I
+       // DrmVersion:
+-      // 3.0.0 = Kernel 5.10
++      // DRM major 3 (kernel 5.10) and 4 (kernel 6.1) use upstream FourCCs.
+       // 2.0.0 = Kernel 4.19 Vop driver 不支持 YUV420_8BIT 格式
+-      if(drmVersion_ == 3){
++      if(drmVersion_ >= 3){
+         return DRM_FORMAT_YUV420_8BIT;
+       }else{
+         return DRM_FORMAT_NV12;
+       }
+     case HAL_PIXEL_FORMAT_YUV420_10BIT_I: // NV12_10bit AFBC MALI_GRALLOC_FORMAT_INTERNAL_Y210
+       // DrmVersion:
+-      // 3.0.0 = Kernel 5.10
++      // DRM major 3 (kernel 5.10) and 4 (kernel 6.1) use upstream FourCCs.
+       // 2.0.0 = Kernel 4.19 Vop driver 不支持 YUV420_8BIT 格式
+-      if(drmVersion_ == 3){
++      if(drmVersion_ >= 3){
+         return DRM_FORMAT_YUV420_10BIT;
+       }else{
+         return DRM_FORMAT_NV12_10;
+diff --git a/rockchip/common/drmtype.cpp b/rockchip/common/drmtype.cpp
+index aa9d591..34a50e7 100644
+--- a/rockchip/common/drmtype.cpp
++++ b/rockchip/common/drmtype.cpp
+@@ -38,6 +38,7 @@
+ 
+ #include "rockchip/drmtype.h"
+ #include <drm_fourcc.h>
++#include "3rd/drm/drmhwc2_fourcc.h"  // RK-private DRM_FORMAT_NV12_10 etc.
+ #include <hardware/gralloc.h>
+ #include <log/log.h>
+ #include <errno.h>
+diff --git a/rockchip/compositor/drmdisplaycomposition.cpp b/rockchip/compositor/drmdisplaycomposition.cpp
+index 2564c07..538adf7 100755
+--- a/rockchip/compositor/drmdisplaycomposition.cpp
++++ b/rockchip/compositor/drmdisplaycomposition.cpp
+@@ -236,8 +236,8 @@ int DrmDisplayComposition::CreateAndAssignReleaseFences(SyncTimeline &sync_timel
+     }
+ 
+ 
+-    int sync_timeline_cnt = sync_timeline.IncTimeline();
+-    sprintf(acBuf,"RFD%" PRIu64 "-FN%" PRIu64 "-TC%d" ,display_id_, frame_no_, sync_timeline_cnt);
++    uint32_t sync_timeline_cnt = sync_timeline.IncTimeline();
++    snprintf(acBuf, sizeof(acBuf),"RFD%" PRIu64 "-FN%" PRIu64 "-TC%u" ,display_id_, frame_no_, sync_timeline_cnt);
+     layer->release_fence = sp<ReleaseFence>(new ReleaseFence(sync_timeline, sync_timeline_cnt, acBuf));
+     if (layer->release_fence->isValid()){
+       HWC2_ALOGD_IF_DEBUG(" Create ReleaseFence(%s) Sucess: frame = %" PRIu64 " LayerName=%s",acBuf, frame_no_, layer->sLayerName_.c_str());
+diff --git a/rockchip/producer/vpcontext.cpp b/rockchip/producer/vpcontext.cpp
+index 0a54804..fe7303f 100755
+--- a/rockchip/producer/vpcontext.cpp
++++ b/rockchip/producer/vpcontext.cpp
+@@ -155,7 +155,7 @@ int VpContext::AddReleaseFence(uint64_t buffer_id){
+   if(mMapBuffer_.count(buffer_id)){
+     char acBuf[32];
+     uFrameNo_ = mTimeLine_.IncTimeline();
+-    sprintf(acBuf,"RFVP-ID%d-B%" PRIu64 "-FN%" PRIu64, iTunnelId_, buffer_id, uFrameNo_);
++    snprintf(acBuf, sizeof(acBuf),"RFVP-ID%d-B%" PRIu64 "-FN%" PRIu64, iTunnelId_, buffer_id, uFrameNo_);
+     sp<ReleaseFence> release_fence = sp<ReleaseFence>(new ReleaseFence(mTimeLine_, uFrameNo_, acBuf));
+     auto &buffer_info = mMapBuffer_[buffer_id];
+     buffer_info->SetReleaseFence(release_fence);

@@ -1,3 +1,14 @@
+diff --git a/Android.bp b/Android.bp
+new file mode 100644
+index 0000000..306d35e
+--- /dev/null
++++ b/Android.bp
+@@ -0,0 +1,5 @@
++// HIDL package root for Rockchip vendor interfaces (rockchip.hardware.*)
++hidl_package_root {
++    name: "rockchip.hardware",
++    path: "vendor/rockchip/hardware/interfaces",
++}
 diff --git a/direct/Android.go b/direct/Android.go
 index b137862..2bc0501 100644
 --- a/direct/Android.go
