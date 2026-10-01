@@ -76,12 +76,39 @@ def replace_ext4_file(image, entry, work):
     actual=read_ext4_metadata(image,inside,work)
     if actual!=expected:raise ValueError('Ownership/mode/xattr verification failed: '+inside)
 
+def remove_ext4_app(image, inside):
+    """Delete one explicitly named application directory in an offline image."""
+    safe_debugfs_path(inside)
+    parts=pathlib.PurePosixPath(inside).parts
+    allowed=(len(parts)==4 and parts[1:3] in [('system','app'),('system','priv-app')]) or (len(parts)==3 and parts[1] in ('app','priv-app'))
+    if not inside.startswith('/') or '..' in parts or not allowed:
+        raise ValueError('remove-app requires one app directory below app/priv-app')
+    initial=run(['/usr/sbin/debugfs','-R','stat '+inside,image])
+    if not initial.strip():raise ValueError('Application directory missing: '+inside)
+    if 'Type: directory' not in initial:raise ValueError('Application root must be a directory')
+    def delete(path):
+        listing=run(['/usr/sbin/debugfs','-R','ls -p '+path,image])
+        for line in listing.splitlines():
+            fields=line.split('/')
+            if len(fields)<7 or not fields[1].isdigit():continue
+            name=fields[5]
+            if name in ('.','..'):continue
+            safe_debugfs_path(name)
+            child=path+'/'+name
+            mode=int(fields[2],8)
+            if stat.S_ISDIR(mode):delete(child)
+            else:run(['/usr/sbin/debugfs','-w','-R','rm '+child,image])
+        run(['/usr/sbin/debugfs','-w','-R','rmdir '+path,image])
+    delete(inside)
+    if run(['/usr/sbin/debugfs','-R','stat '+inside,image]).strip():
+        raise ValueError('Application removal failed: '+inside)
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--base',type=pathlib.Path,required=True)
     ap.add_argument('--verification',type=pathlib.Path)
     ap.add_argument('--output',type=pathlib.Path,required=True)
-    ap.add_argument('--changes',type=pathlib.Path,help='JSON array: partition, path (inside ext4), source, optional mode/selinux')
+    ap.add_argument('--changes',type=pathlib.Path,help='JSON array: partition/path and op=remove-app, or source with optional mode/selinux for replacement')
     ap.add_argument('--tools',type=pathlib.Path,required=True)
     args=ap.parse_args();base=args.base.resolve();output=args.output.resolve()
     if output.exists() or output==base:raise ValueError('Output must be a new path')
@@ -97,7 +124,10 @@ def main():
         for entry in changes:
             name=entry['partition']
             if name not in metadata['partitions']:raise ValueError('Invalid partition')
-            replace_ext4_file(work/(name+'.img'),entry,work)
+            operation=entry.get('op','replace')
+            if operation=='remove-app':remove_ext4_app(work/(name+'.img'),entry['path'])
+            elif operation=='replace':replace_ext4_file(work/(name+'.img'),entry,work)
+            else:raise ValueError('Unknown image operation: '+operation)
         lpmake=[args.tools/'lpmake','--metadata-size','65536','--metadata-slots','2','--device','super:2516582400','--group','rockchip_dynamic_partitions:2512388096','--force-full-image','--output',output]
         for name in metadata['partitions']:
             p=work/(name+'.img');run(['/usr/sbin/e2fsck','-fn',p])

@@ -1,0 +1,20 @@
+{
+  "applications_removed": [
+    "acr.browser.lightning",
+    "com.android.traceur"
+  ],
+  "unchanged_partitions": [
+    "system_dlkm",
+    "system_ext",
+    "vendor",
+    "vendor_dlkm",
+    "odm",
+    "odm_dlkm",
+    "product"
+  ],
+  "hwcomposer_sha256": "6ff8507170e584a4a9a105219ad6efa86f9a0ec3f802648f84df3dc9b91fb25d",
+  "keyboard_launcher_bluetooth_apex_preserved": true,
+  "all_8_partition_checks_passed": true,
+  "super_sha256": "8b1b6ed439e939bf892c663f31902e23e3903b3b3d4dbcf2dd9ad543a1ece6f8",
+  "device_boot_validation_pending": true
+}

@@ -9,6 +9,7 @@ jobs:
       - run: python3 -m py_compile scripts/*.py loader/*.py
       - run: bash -n scripts/*.sh
       - run: python3 tests/test_source_preparation.py
+      - run: python3 tests/test_repack_app_removal.py
       - run: |
           cc -fsanitize=address,undefined -Wall -Wextra -Werror tests/wifi-mac-selection-test.c -o /tmp/mac-test
           /tmp/mac-test

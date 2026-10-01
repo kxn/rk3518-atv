@@ -167,10 +167,17 @@ index c59cda3..0ba9bd3 100644
  ifneq ($(filter rk3326 rk3528 rk356x rk3562 rk3588, $(strip $(TARGET_BOARD_PLATFORM))), )
  
 diff --git a/modules/rockchip_apps.mk b/modules/rockchip_apps.mk
-index 1f27492..4ce59b8 100644
+index 1f27492..697e4b9 100644
 --- a/modules/rockchip_apps.mk
 +++ b/modules/rockchip_apps.mk
-@@ -21,3 +21,8 @@ PRODUCT_PACKAGES += \
+@@ -15,9 +15,14 @@
+ #
+ PRODUCT_PACKAGES += \
+     RKDeviceTest \
+-    Lightning \
++    $(if $(filter-out rk3528_box,$(TARGET_PRODUCT)),Lightning) \
+     LiveWallpapersPicker \
+     RkVideoPlayer \
      RkExplorer \
      StressTest \
      RKUpdateService
@@ -180,9 +187,18 @@ index 1f27492..4ce59b8 100644
 +PRODUCT_PACKAGES := $(filter-out RKUpdateService RKDeviceTest StressTest MediaCenter DLNA WifiDisplay,$(PRODUCT_PACKAGES))
 +endif
 diff --git a/modules/rockchip_apps_box.mk b/modules/rockchip_apps_box.mk
-index 12771f8..f10ddf9 100644
+index 12771f8..831d425 100644
 --- a/modules/rockchip_apps_box.mk
 +++ b/modules/rockchip_apps_box.mk
+@@ -26,7 +26,7 @@ PRODUCT_PACKAGES := \
+ 
+ ifneq ($(strip $(BUILD_WITH_GOOGLE_MARKET)), true)
+     PRODUCT_PACKAGES += \
+-        Lightning
++        $(if $(filter-out rk3528_box,$(TARGET_PRODUCT)),Lightning)
+ endif
+ 
+ ifeq ($(strip $(BOARD_HAS_STRESSTEST_APP)), true)
 @@ -45,3 +45,8 @@ PRODUCT_PACKAGES += \
      MediaCenter
  
@@ -395,6 +411,19 @@ index 91888ae..c07650d 100755
  allow shell proc_kmsg:file getattr;
  allow shell proc_iomem:file getattr;
  allow shell proc_misc:file getattr;
+diff --git a/tv/tv_base.mk b/tv/tv_base.mk
+index ef04bac..92f89c3 100755
+--- a/tv/tv_base.mk
++++ b/tv/tv_base.mk
+@@ -20,7 +20,7 @@ PRODUCT_PACKAGES := \
+     SettingsIntelligence
+ 
+ ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
+-PRODUCT_PACKAGES += Traceur
++PRODUCT_PACKAGES += $(if $(filter-out rk3528_box,$(TARGET_PRODUCT)),Traceur)
+ endif
+ 
+ PRODUCT_COPY_FILES := \
 diff --git a/wifi_bt_common.mk b/wifi_bt_common.mk
 index 304e730..3911cb2 100644
 --- a/wifi_bt_common.mk

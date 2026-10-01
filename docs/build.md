@@ -52,3 +52,12 @@ U-Boot 源码及实际配置在组件仓库和 device-support/configs 中。它�
 本次只调整源码来源和组织，保留现有固件的代码修改；并没有产出或宣称验收新的整机镜像。
 `project.py apply` 依次应用 AOSP/独立树补丁、按清单提取 SDK 文件、安装本项目覆盖。
 再次执行会校验已准备文件；发现用户修改则报错，避免静默覆盖。
+
+## v8 应用精简
+
+rk3528_box 不再打包 Lightning 浏览器和 Traceur（System Tracing）应用；其他产品的选择不变。
+屏幕输入法、TvSettings、配对程序、WebView/媒体组件和底层诊断接口保留。
+离线 repack 的 changes 清单支持 `op: remove-app`，仅允许删除 app/priv-app 下明确命名的单个应用目录；
+递归删除后检查不存在，并对所有分区执行 e2fsck 和打包读回哈希校验。
+不要对运行中、几乎满载的 vendor 分区在线覆盖 HWC 文件。以离线生成并验证的 super 镜像恢复/更新，
+刷后核对实际 HWC SHA256，并通过一次重启确认持久性。

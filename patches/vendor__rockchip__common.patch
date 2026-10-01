@@ -124,6 +124,19 @@ index b14209d..0446ced 100755
  #endif
           char parameterByte[3];  // for save the transfer byte modify by lance 2013.07.31
           memset(parameterByte, 0, 3);
+diff --git a/apps/apps.mk b/apps/apps.mk
+index 75986b5..384ccd8 100755
+--- a/apps/apps.mk
++++ b/apps/apps.mk
+@@ -16,7 +16,7 @@ endif
+ 
+ ifneq ($(strip $(BUILD_WITH_GOOGLE_MARKET)), true)
+ PRODUCT_PACKAGES += \
+-	       Lightning
++	       $(if $(filter-out rk3528_box,$(TARGET_PRODUCT)),Lightning)
+ endif
+ 
+ ifneq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)), vr)
 diff --git a/gpu/Mali450.mk b/gpu/Mali450.mk
 index da2fe8e..5d547c6 100644
 --- a/gpu/Mali450.mk
